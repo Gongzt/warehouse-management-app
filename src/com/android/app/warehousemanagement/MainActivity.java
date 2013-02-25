@@ -3,6 +3,7 @@ package com.android.app.warehousemanagement;
 import android.os.Bundle;
 import android.app.Activity;
 import android.view.Menu;
+import android.view.Window;
 import android.widget.TabHost;
 import android.widget.TabHost.OnTabChangeListener;
 
@@ -11,8 +12,11 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
-		
+        
+		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE); // 注意顺序   
+		setContentView(R.layout.activity_main); // 注意顺序   
+        getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.title);  // 注意顺序   
+        
 		setupTabHost(0);
 	}
 
