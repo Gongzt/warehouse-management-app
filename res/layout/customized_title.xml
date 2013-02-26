@@ -21,10 +21,5 @@
         android:text="Orz"
         android:textColor="#ABACAC"
         android:textSize="15sp" />
-    
-    <android.widget.SearchView
-        android:id="@+id/searchView1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
 
 </LinearLayout>
