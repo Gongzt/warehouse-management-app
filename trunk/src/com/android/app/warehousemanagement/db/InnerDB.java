@@ -8,9 +8,8 @@ public class InnerDB extends SQLiteOpenHelper{
 
 	public static final int DATABASE_VERSION = 2;
 	public static final String DATABASE_NAME = "Warehouse.db";
-	private static final String INTEGER_TYPE = " INTEGER";
+	private static final String INTEGER_TYPE = " Integer";
 	private static final String TEXT_TYPE = " VARCHAR";
-	private static final String DATE_TYPE = " DATE";
 	private static final String COMMA_SEP = ",";
 	
 	private static final String SQL_CREATE_CURRENT =    
@@ -31,7 +30,7 @@ public class InnerDB extends SQLiteOpenHelper{
 			InnerDBTable.Record.COLUMN_NAME_INOROUT + TEXT_TYPE + COMMA_SEP +
 			InnerDBTable.Record.COLUMN_NAME_REMARK + TEXT_TYPE + COMMA_SEP +
 			InnerDBTable.Record.COLUMN_NAME_STATUS + TEXT_TYPE + COMMA_SEP +
-			InnerDBTable.Record.COLUMN_NAME_DATE + DATE_TYPE + COMMA_SEP +
+			InnerDBTable.Record.COLUMN_NAME_DATE + TEXT_TYPE + COMMA_SEP +
 			InnerDBTable.Current.COLUMN_NAME_AMOUNT + INTEGER_TYPE +
 			" )";
 	
@@ -84,6 +83,34 @@ public class InnerDB extends SQLiteOpenHelper{
 		insertSql = "INSERT INTO Current (entryname, warehouse, amount, type) values ('哈哈盒子', '总仓库', 12, '产品')";
 		db.execSQL(insertSql);
 		
+		//initiate record database
+		insertSql = "INSERT INTO Record (entryname, warehouse, amount, type, inorout, remark, status, date) values " +
+				"('油漆100ml', '总仓库', 2, '原料', '入库', '荣盛发货', '审核', '201204051203')";
+		db.execSQL(insertSql);
+		insertSql = "INSERT INTO Record (entryname, warehouse, amount, type, inorout, remark, status, date) values " +
+				"('油漆100ml', '佛山仓库', 1, '原料', '入库', '荣盛发货', '审核', '201203060900')";
+		db.execSQL(insertSql);
+		insertSql = "INSERT INTO Record (entryname, warehouse, amount, type, inorout, remark, status, date) values " +
+				"('油漆100ml', '总仓库', 1, '原料', '出库', '星期六订单', '审核', '201205051600')";
+		db.execSQL(insertSql);
+		insertSql = "INSERT INTO Record (entryname, warehouse, amount, type, inorout, remark, status, date) values " +
+				"('油漆100ml', '广州仓库', 2, '原料', '出库', '星期六订单', '审核', '201205060900')";
+		db.execSQL(insertSql);
+		insertSql = "INSERT INTO Record (entryname, warehouse, amount, type, inorout, remark, status, date) values " +
+				"('ST&SAT盒子', '总仓库', 2, '产品', '入库', '星期六订单', '审核', '201206061400')";
+		db.execSQL(insertSql);
+		insertSql = "INSERT INTO Record (entryname, warehouse, amount, type, inorout, remark, status, date) values " +
+				"('ST&SAT盒子', '佛山仓库', 5, '产品', '入库', '星期六订单', '审核', '201206061500')";
+		db.execSQL(insertSql);
+		insertSql = "INSERT INTO Record (entryname, warehouse, amount, type, inorout, remark, status, date) values " +
+				"('哈哈盒子', '总仓库', 1, '产品', '出库', '哈哈订单', '审核', '201207081600')";
+		db.execSQL(insertSql);
+		insertSql = "INSERT INTO Record (entryname, warehouse, amount, type, inorout, remark, status, date) values " +
+				"('ST&SAT盒子', '总仓库', 7, '产品', '出库', '星期六订单', '待审', '201207081023')";
+		db.execSQL(insertSql);
+		insertSql = "INSERT INTO Record (entryname, warehouse, amount, type, inorout, remark, status, date) values " +
+				"('双铜纸100*100', '广州仓库', 2, '原料', '出库', '百丽发货', '待审', '201204201502')";
+		db.execSQL(insertSql);
 		
 	}
 	
