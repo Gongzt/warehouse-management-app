@@ -1,6 +1,7 @@
 package com.android.app.warehousemanagement.db;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -18,7 +19,9 @@ public class InnerDBExec{
 		dbHelper = new InnerDB(context);
 	}
 	
-	public ArrayList<HashMap<String, Object>> currentSelectAll(){
+	//select all the rows from the Current table, sum up all the amount from different warehouse
+	//return order: entryid, entryname, type, amount
+	public String[][] currentSelectAll(){
 		
 		SQLiteDatabase readableDB = dbHelper.getReadableDatabase();
 		
@@ -37,14 +40,13 @@ public class InnerDBExec{
 		
 		Cursor c = readableDB.query(InnerDBTable.Current.TABLE_NAME, projection, selection, selectionArgs, groupBy, having, orderBy, limit);
 		
-		ArrayList<HashMap<String, Object>> result = new ArrayList<HashMap<String, Object>>();
+		String[][] result = new String[c.getCount()][4];
 		c.moveToFirst();
 		for (int i = 0; i<c.getCount(); i++){
-			HashMap<String, Object> temp = new HashMap<String, Object>();
-			temp.put(InnerDBTable.Current.COLUMN_NAME_ENTRY_NAME, c.getString(1));
-			temp.put(InnerDBTable.Current.COLUMN_NAME_ENTRY_TYPE, c.getString(2));
-			temp.put(InnerDBTable.Current.COLUMN_NAME_AMOUNT, c.getInt(3));
-			result.add(temp);
+			result[i][0] = c.getString(0);
+			result[i][1] = c.getString(1);
+			result[i][2] = c.getString(2);
+			result[i][3] = c.getString(3);
 			c.moveToNext();
 		}
 
@@ -52,12 +54,13 @@ public class InnerDBExec{
 		return result;
 	}
 	
+	//search the product(material) name containing the keyword
+	//return order: entryname
 	public String[] currentSearchName(String keyword){
 		
 		SQLiteDatabase readableDB = dbHelper.getReadableDatabase();
 		
 		String[] projection = {
-				InnerDBTable.Current.COLUMN_NAME_ENTRY_ID,
 				InnerDBTable.Current.COLUMN_NAME_ENTRY_NAME, 
 		};
 		String selection = InnerDBTable.Current.COLUMN_NAME_ENTRY_NAME + " LIKE ?";
@@ -72,7 +75,7 @@ public class InnerDBExec{
 		String[] result = new String[c.getCount()];
 		c.moveToFirst();
 		for (int i = 0; i<c.getCount(); i++){
-			result[i] = c.getString(1);
+			result[i] = c.getString(0);
 			c.moveToNext();
 		}
 
@@ -80,7 +83,9 @@ public class InnerDBExec{
 		return result;
 	}
 	
-	public ArrayList<HashMap<String, Object>> currentSearch(String keyword){
+	//search the product(material) relative to the keyword
+	//return order: entryid, entryname, type, amount
+	public String[][] currentSearch(String keyword){
 		
 		SQLiteDatabase readableDB = dbHelper.getReadableDatabase();
 		
@@ -102,14 +107,13 @@ public class InnerDBExec{
 		
 		Cursor c = readableDB.query(InnerDBTable.Current.TABLE_NAME, projection, selection, selectionArgs, groupBy, having, orderBy, limit);
 		
-		ArrayList<HashMap<String, Object>> result = new ArrayList<HashMap<String, Object>>();
+		String[][] result = new String[c.getCount()][4];
 		c.moveToFirst();
 		for (int i = 0; i<c.getCount(); i++){
-			HashMap<String, Object> temp = new HashMap<String, Object>();
-			temp.put(InnerDBTable.Current.COLUMN_NAME_ENTRY_NAME, c.getString(1));
-			temp.put(InnerDBTable.Current.COLUMN_NAME_ENTRY_TYPE, c.getString(2));
-			temp.put(InnerDBTable.Current.COLUMN_NAME_AMOUNT, c.getInt(3));
-			result.add(temp);
+			result[i][0] = c.getString(0);
+			result[i][1] = c.getString(1);
+			result[i][2] = c.getString(2);
+			result[i][3] = c.getString(3);
 			c.moveToNext();
 		}
 
@@ -117,6 +121,7 @@ public class InnerDBExec{
 		return result;
 	}
 	
+	//update the product(material) amount, if product(material) not exist, insert it
 	public long currentUpdate (String name, String type, String warehouse, int change) {
 		
 		SQLiteDatabase readableDB = dbHelper.getReadableDatabase();
@@ -172,7 +177,9 @@ public class InnerDBExec{
 		return id;
 	}
 	
-	public String[][] RecordSelectAll(){
+	//select all the rows from the record table
+	//return order: recordid, entryname, type, warehouse, amount, inorout, status, remark, date
+	public String[][] recordSelectAll(){
 		
 		SQLiteDatabase readableDB = dbHelper.getReadableDatabase();
 		
@@ -196,17 +203,18 @@ public class InnerDBExec{
 		
 		Cursor c = readableDB.query(InnerDBTable.Record.TABLE_NAME, projection, selection, selectionArgs, groupBy, having, orderBy, limit);
 		
-		String[][] result = new String[c.getCount()][8];
+		String[][] result = new String[c.getCount()][9];
 		c.moveToFirst();
 		for (int i = 0; i<c.getCount(); i++){
-			result[i][0] = c.getString(1);
-			result[i][1] = c.getString(2);
-			result[i][2] = c.getString(3);
-			result[i][3] = c.getString(4);
-			result[i][4] = c.getString(5);
-			result[i][5] = c.getString(6);
-			result[i][6] = c.getString(7);
-			result[i][7] = c.getString(8);
+			result[i][0] = c.getString(0);
+			result[i][1] = c.getString(1);
+			result[i][2] = c.getString(2);
+			result[i][3] = c.getString(3);
+			result[i][4] = c.getString(4);
+			result[i][5] = c.getString(5);
+			result[i][6] = c.getString(6);
+			result[i][7] = c.getString(7);
+			result[i][8] = c.getString(8);
 			c.moveToNext();
 		}
 
@@ -214,7 +222,104 @@ public class InnerDBExec{
 		return result;
 	}
 	
-	public void insertEntry(String entryName, String entryType, String warehouse, int amount, String inOrOut, String status, String remark, Date date){
+	//search the record relative to the keyword
+	//return order: recordid, entryname, type, warehouse, amount, inorout, status, remark, date
+	public String[][] recordSearch(String keyword){
+		
+		SQLiteDatabase readableDB = dbHelper.getReadableDatabase();
+		
+		String[] projection = {
+				InnerDBTable.Record.COLUMN_NAME_RECORD_ID,
+				InnerDBTable.Record.COLUMN_NAME_ENTRY_NAME,
+				InnerDBTable.Record.COLUMN_NAME_ENTRY_TYPE,
+				InnerDBTable.Record.COLUMN_NAME_WAREHOUSE,
+				InnerDBTable.Record.COLUMN_NAME_AMOUNT,
+				InnerDBTable.Record.COLUMN_NAME_INOROUT,
+				InnerDBTable.Record.COLUMN_NAME_STATUS,
+				InnerDBTable.Record.COLUMN_NAME_REMARK,
+				InnerDBTable.Record.COLUMN_NAME_DATE, 
+		};
+		String selection = InnerDBTable.Record.COLUMN_NAME_ENTRY_NAME + " LIKE ? OR " +
+				InnerDBTable.Record.COLUMN_NAME_ENTRY_TYPE + " LIKE ? OR " +
+				InnerDBTable.Record.COLUMN_NAME_REMARK + " LIKE ? OR " +
+				InnerDBTable.Record.COLUMN_NAME_STATUS + " LIKE ? OR " +
+				InnerDBTable.Record.COLUMN_NAME_WAREHOUSE + " LIKE ? OR " +
+				InnerDBTable.Record.COLUMN_NAME_INOROUT + " LIKE ?";;
+		String[] selectionArgs = {"%"+keyword+"%", "%"+keyword+"%", "%"+keyword+"%", "%"+keyword+"%", "%"+keyword+"%", "%"+keyword+"%"};;
+		String groupBy = null;
+		String having = null;
+		String orderBy = null;
+		String limit = null;
+		
+		Cursor c = readableDB.query(InnerDBTable.Record.TABLE_NAME, projection, selection, selectionArgs, groupBy, having, orderBy, limit);
+		
+		String[][] result = new String[c.getCount()][9];
+		c.moveToFirst();
+		for (int i = 0; i<c.getCount(); i++){
+			result[i][0] = c.getString(0);
+			result[i][1] = c.getString(1);
+			result[i][2] = c.getString(2);
+			result[i][3] = c.getString(3);
+			result[i][4] = c.getString(4);
+			result[i][5] = c.getString(5);
+			result[i][6] = c.getString(6);
+			result[i][7] = c.getString(7);
+			result[i][8] = c.getString(8);
+			c.moveToNext();
+		}
+
+		readableDB.close();
+		return result;
+	}
+	
+	//search the record between the start date and end date
+	//return order: recordid, entryname, type, warehouse, amount, inorout, status, remark, date
+	public String[][] recordSelectByDate(String start, String end){
+
+		SQLiteDatabase readableDB = dbHelper.getReadableDatabase();
+		
+		String[] projection = {
+				InnerDBTable.Record.COLUMN_NAME_RECORD_ID,
+				InnerDBTable.Record.COLUMN_NAME_ENTRY_NAME,
+				InnerDBTable.Record.COLUMN_NAME_ENTRY_TYPE,
+				InnerDBTable.Record.COLUMN_NAME_WAREHOUSE,
+				InnerDBTable.Record.COLUMN_NAME_AMOUNT,
+				InnerDBTable.Record.COLUMN_NAME_INOROUT,
+				InnerDBTable.Record.COLUMN_NAME_STATUS,
+				InnerDBTable.Record.COLUMN_NAME_REMARK,
+				InnerDBTable.Record.COLUMN_NAME_DATE, 
+		};
+		String selection = InnerDBTable.Record.COLUMN_NAME_DATE + " > ? AND " +
+				InnerDBTable.Record.COLUMN_NAME_DATE + " < ?";
+		String[] selectionArgs = {start, end};
+		String groupBy = null;
+		String having = null;
+		String orderBy = null;
+		String limit = null;
+		
+		Cursor c = readableDB.query(InnerDBTable.Record.TABLE_NAME, projection, selection, selectionArgs, groupBy, having, orderBy, limit);
+		
+		String[][] result = new String[c.getCount()][9];
+		c.moveToFirst();
+		for (int i = 0; i<c.getCount(); i++){
+			result[i][0] = c.getString(0);
+			result[i][1] = c.getString(1);
+			result[i][2] = c.getString(2);
+			result[i][3] = c.getString(3);
+			result[i][4] = c.getString(4);
+			result[i][5] = c.getString(5);
+			result[i][6] = c.getString(6);
+			result[i][7] = c.getString(7);
+			result[i][8] = c.getString(8);
+			c.moveToNext();
+		}
+
+		readableDB.close();
+		return result;
+	}
+	
+	//insert a new record into the Record table
+	public void recordInsert(String entryName, String entryType, String warehouse, int amount, String inOrOut, String status, String remark, Calendar calendar){
 		SQLiteDatabase writableDB = dbHelper.getWritableDatabase();
 		
 		ContentValues values = new ContentValues();
@@ -225,38 +330,74 @@ public class InnerDBExec{
 		values.put(InnerDBTable.Record.COLUMN_NAME_INOROUT, inOrOut);
 		values.put(InnerDBTable.Record.COLUMN_NAME_STATUS, status);
 		values.put(InnerDBTable.Record.COLUMN_NAME_REMARK, remark);
-		values.put(InnerDBTable.Record.COLUMN_NAME_DATE, date.toString());
+		values.put(InnerDBTable.Record.COLUMN_NAME_DATE, parseDate(calendar));
 		
 		writableDB.insert(InnerDBTable.Record.TABLE_NAME, "null", values);
 		writableDB.close();
 	}
+
+	//update the record status and date
+	public void recordUpdate(String id){
+
+		SQLiteDatabase writableDB = dbHelper.getWritableDatabase();
+		
+		String selection = InnerDBTable.Record.COLUMN_NAME_RECORD_ID + " = ?";
+		String[] selectionArgs = {""+id};
+		
+		Calendar calendar = Calendar.getInstance();
+		ContentValues values = new ContentValues();
+		values.put(InnerDBTable.Record.COLUMN_NAME_STATUS, "ÉóÅú");
+		values.put(InnerDBTable.Record.COLUMN_NAME_DATE, parseDate(calendar));
+		
+		writableDB.update(InnerDBTable.Record.TABLE_NAME, values, selection, selectionArgs);
+		
+		writableDB.close();
+	}
 	
-	public String[] readEntry(){
-		SQLiteDatabase readableDB = dbHelper.getReadableDatabase();
+	//delete a record
+	public void recordDelete(String id){
 		
-		String[] projection = {
-				InnerDBTable.Current.COLUMN_NAME_ENTRY_ID,
-				InnerDBTable.Current.COLUMN_NAME_ENTRY_NAME,
-				InnerDBTable.Current.COLUMN_NAME_ENTRY_TYPE,
-				InnerDBTable.Current.COLUMN_NAME_AMOUNT
-		};
+		SQLiteDatabase writableDB = dbHelper.getWritableDatabase();
 		
-		Cursor c = readableDB.query(InnerDBTable.Current.TABLE_NAME, projection, null, null, null, null, null);
+		String selection = InnerDBTable.Record.COLUMN_NAME_RECORD_ID + " = ?";
+		String[] selectionArgs = {""+id};
 		
-		String[] result = new String[c.getCount()];
-		c.moveToFirst();
-		int i = 0;
-		while (!c.isLast()){
-			result[i] = c.getString(1);
-			c.moveToNext();
-			i++;
-		}
-		result[i] = c.getString(1);
+		writableDB.delete(InnerDBTable.Record.TABLE_NAME, selection, selectionArgs);
 		
+		writableDB.close();
+	}
+	
+	private String parseDate(Calendar calendar){
+		int year = calendar.get(Calendar.YEAR);
+		int month = calendar.get(Calendar.MONTH);
+		int day = calendar.get(Calendar.DAY_OF_MONTH);
+		int hour = calendar.get(Calendar.HOUR_OF_DAY);
+		int minute = calendar.get(Calendar.MINUTE);
 		
-		readableDB.close();
+		String date = "" + year;
+		if (month<10) date += "0" + month;
+		else date += month;
+		if (day<10) date += "0" + day;
+		else date += day;
+		if (hour<10) date += "0" + hour;
+		else date += hour;
+		if (minute<10) date += "0" + minute;
+		else date += minute;
 		
-		return result;
+		return date;
+	}
+	
+	public Calendar parseDate(String date){
+		int year = Integer.parseInt(date.substring(0, 4));
+		int month = Integer.parseInt(date.substring(4,6));
+		int day = Integer.parseInt(date.substring(6, 8));
+		int hour = Integer.parseInt(date.substring(8, 10));
+		int minute = Integer.parseInt(date.substring(10, 12));
+		
+		Calendar calendar = Calendar.getInstance();
+		calendar.set(year, month, day, hour, minute);
+		
+		return calendar;
 	}
 
 }
