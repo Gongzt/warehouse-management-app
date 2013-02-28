@@ -1,9 +1,6 @@
 package com.android.app.warehousemanagement.db;
 
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
 
 import android.content.ContentValues;
 import android.content.Context;
