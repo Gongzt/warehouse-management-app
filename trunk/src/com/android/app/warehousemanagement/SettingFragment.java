@@ -6,7 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-public class Fragment4 extends Fragment{
+public class SettingFragment extends Fragment{
     @Override
     public void onCreate(Bundle savedInstanceState) {
         // TODO Auto-generated method stub

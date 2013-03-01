@@ -9,7 +9,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
-public class Fragment1 extends ListFragment{
+public class CurrentFragment extends ListFragment{
 	private String[] items;
 	
     @Override

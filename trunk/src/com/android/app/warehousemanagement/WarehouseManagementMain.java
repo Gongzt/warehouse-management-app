@@ -40,16 +40,16 @@ public class WarehouseManagementMain extends FragmentActivity {
 	    
 		tabManager.addTab(
 				tabHost.newTabSpec("Fragment1").setIndicator("库存现状"),
-				Fragment1.class, null);
+				CurrentFragment.class, null);
 		tabManager.addTab(
 				tabHost.newTabSpec("Fragment2").setIndicator("入库"),
-				Fragment2.class, null);
+				InStockFragment.class, null);
 		tabManager.addTab(
 				tabHost.newTabSpec("Fragment3").setIndicator("历史"),
-				Fragment3.class, null);
+				RecordFragment.class, null);
 		tabManager.addTab(
 				tabHost.newTabSpec("Fragment4").setIndicator("设置"),
-				Fragment4.class, null);
+				SettingFragment.class, null);
     }
 
 }
