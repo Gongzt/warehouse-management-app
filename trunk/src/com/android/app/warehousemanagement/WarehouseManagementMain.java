@@ -17,7 +17,7 @@ public class WarehouseManagementMain extends FragmentActivity {
         
 		// customized title
 		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE); // 注意顺序   
-		setContentView(R.layout.activity_main); // 注意顺序   
+		setContentView(R.layout.warehouse_management_main); // 注意顺序   
         getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.customized_title);  // 注意顺序   
         
 		setupTabHost(0);

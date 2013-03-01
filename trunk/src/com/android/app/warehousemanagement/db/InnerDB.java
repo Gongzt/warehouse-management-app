@@ -115,7 +115,6 @@ public class InnerDB extends SQLiteOpenHelper{
 		
 	}
 	
-	@SuppressLint("Override")
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion){
 		db.execSQL(SQL_DELETE_CURRENT);
@@ -124,7 +123,6 @@ public class InnerDB extends SQLiteOpenHelper{
 	}
 	
 	@SuppressLint("Override")
-	@Override
 	public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 		onUpgrade(db,oldVersion,newVersion);
 	}
