@@ -18,7 +18,7 @@ public class InnerDBExec{
 	
 	//select all the rows from the Current table, sum up all the amount from different warehouse
 	//return order: entryid, entryname, type, amount
-	public String[][] currentSelectAll(){
+	public Cursor currentSelectAll(){
 		
 		SQLiteDatabase readableDB = dbHelper.getReadableDatabase();
 		
@@ -26,7 +26,7 @@ public class InnerDBExec{
 				InnerDBTable.Current.COLUMN_NAME_ENTRY_ID,
 				InnerDBTable.Current.COLUMN_NAME_ENTRY_NAME,
 				InnerDBTable.Current.COLUMN_NAME_ENTRY_TYPE,
-				"SUM(" + InnerDBTable.Current.COLUMN_NAME_AMOUNT + ")" 
+				"SUM(" + InnerDBTable.Current.COLUMN_NAME_AMOUNT + ") AS " + InnerDBTable.Current.COLUMN_NAME_AMOUNT 
 		};
 		String selection = null;
 		String[] selectionArgs = null;
@@ -36,19 +36,10 @@ public class InnerDBExec{
 		String limit = null;
 		
 		Cursor c = readableDB.query(InnerDBTable.Current.TABLE_NAME, projection, selection, selectionArgs, groupBy, having, orderBy, limit);
-		
-		String[][] result = new String[c.getCount()][4];
 		c.moveToFirst();
-		for (int i = 0; i<c.getCount(); i++){
-			result[i][0] = c.getString(0);
-			result[i][1] = c.getString(1);
-			result[i][2] = c.getString(2);
-			result[i][3] = c.getString(3);
-			c.moveToNext();
-		}
-
 		readableDB.close();
-		return result;
+		return c;
+		
 	}
 	
 	//search the product(material) name containing the keyword
@@ -82,7 +73,7 @@ public class InnerDBExec{
 	
 	//search the product(material) relative to the keyword
 	//return order: entryid, entryname, type, amount
-	public String[][] currentSearch(String keyword){
+	public Cursor currentSearch(String keyword){
 		
 		SQLiteDatabase readableDB = dbHelper.getReadableDatabase();
 		
@@ -90,7 +81,7 @@ public class InnerDBExec{
 				InnerDBTable.Current.COLUMN_NAME_ENTRY_ID,
 				InnerDBTable.Current.COLUMN_NAME_ENTRY_NAME,
 				InnerDBTable.Current.COLUMN_NAME_ENTRY_TYPE,
-				"SUM(" + InnerDBTable.Current.COLUMN_NAME_AMOUNT + ")" 
+				"SUM(" + InnerDBTable.Current.COLUMN_NAME_AMOUNT + ") AS " + InnerDBTable.Current.COLUMN_NAME_AMOUNT 
 		};
 		String selection = 
 				InnerDBTable.Current.COLUMN_NAME_ENTRY_NAME + " LIKE ? OR " +
@@ -103,19 +94,9 @@ public class InnerDBExec{
 		String limit = null;
 		
 		Cursor c = readableDB.query(InnerDBTable.Current.TABLE_NAME, projection, selection, selectionArgs, groupBy, having, orderBy, limit);
-		
-		String[][] result = new String[c.getCount()][4];
 		c.moveToFirst();
-		for (int i = 0; i<c.getCount(); i++){
-			result[i][0] = c.getString(0);
-			result[i][1] = c.getString(1);
-			result[i][2] = c.getString(2);
-			result[i][3] = c.getString(3);
-			c.moveToNext();
-		}
-
 		readableDB.close();
-		return result;
+		return c;
 	}
 	
 	//update the product(material) amount, if product(material) not exist, insert it
@@ -176,7 +157,7 @@ public class InnerDBExec{
 	
 	//select all the rows from the record table
 	//return order: recordid, entryname, type, warehouse, amount, inorout, status, remark, date
-	public String[][] recordSelectAll(){
+	public Cursor recordSelectAll(){
 		
 		SQLiteDatabase readableDB = dbHelper.getReadableDatabase();
 		
@@ -199,29 +180,33 @@ public class InnerDBExec{
 		String limit = null;
 		
 		Cursor c = readableDB.query(InnerDBTable.Record.TABLE_NAME, projection, selection, selectionArgs, groupBy, having, orderBy, limit);
-		
-		String[][] result = new String[c.getCount()][9];
 		c.moveToFirst();
-		for (int i = 0; i<c.getCount(); i++){
-			result[i][0] = c.getString(0);
-			result[i][1] = c.getString(1);
-			result[i][2] = c.getString(2);
-			result[i][3] = c.getString(3);
-			result[i][4] = c.getString(4);
-			result[i][5] = c.getString(5);
-			result[i][6] = c.getString(6);
-			result[i][7] = c.getString(7);
-			result[i][8] = c.getString(8);
-			c.moveToNext();
-		}
-
+		
 		readableDB.close();
-		return result;
+		return c;
+		
+//		String[][] result = new String[c.getCount()][9];
+//		c.moveToFirst();
+//		for (int i = 0; i<c.getCount(); i++){
+//			result[i][0] = c.getString(0);
+//			result[i][1] = c.getString(1);
+//			result[i][2] = c.getString(2);
+//			result[i][3] = c.getString(3);
+//			result[i][4] = c.getString(4);
+//			result[i][5] = c.getString(5);
+//			result[i][6] = c.getString(6);
+//			result[i][7] = c.getString(7);
+//			result[i][8] = c.getString(8);
+//			c.moveToNext();
+//		}
+//
+//		readableDB.close();
+//		return result;
 	}
 	
 	//search the record relative to the keyword
 	//return order: recordid, entryname, type, warehouse, amount, inorout, status, remark, date
-	public String[][] recordSearch(String keyword){
+	public Cursor recordSearch(String keyword){
 		
 		SQLiteDatabase readableDB = dbHelper.getReadableDatabase();
 		
@@ -249,24 +234,25 @@ public class InnerDBExec{
 		String limit = null;
 		
 		Cursor c = readableDB.query(InnerDBTable.Record.TABLE_NAME, projection, selection, selectionArgs, groupBy, having, orderBy, limit);
-		
-		String[][] result = new String[c.getCount()][9];
 		c.moveToFirst();
-		for (int i = 0; i<c.getCount(); i++){
-			result[i][0] = c.getString(0);
-			result[i][1] = c.getString(1);
-			result[i][2] = c.getString(2);
-			result[i][3] = c.getString(3);
-			result[i][4] = c.getString(4);
-			result[i][5] = c.getString(5);
-			result[i][6] = c.getString(6);
-			result[i][7] = c.getString(7);
-			result[i][8] = c.getString(8);
-			c.moveToNext();
-		}
+		
+//		String[][] result = new String[c.getCount()][9];
+//		c.moveToFirst();
+//		for (int i = 0; i<c.getCount(); i++){
+//			result[i][0] = c.getString(0);
+//			result[i][1] = c.getString(1);
+//			result[i][2] = c.getString(2);
+//			result[i][3] = c.getString(3);
+//			result[i][4] = c.getString(4);
+//			result[i][5] = c.getString(5);
+//			result[i][6] = c.getString(6);
+//			result[i][7] = c.getString(7);
+//			result[i][8] = c.getString(8);
+//			c.moveToNext();
+//		}
 
 		readableDB.close();
-		return result;
+		return c;
 	}
 	
 	//search the record between the start date and end date
