@@ -1,6 +1,5 @@
 package com.android.app.warehousemanagement;
 
-import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.support.v4.widget.SimpleCursorAdapter;
