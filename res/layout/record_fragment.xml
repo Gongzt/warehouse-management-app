@@ -3,24 +3,82 @@
     xmlns:tools="http://schemas.android.com/tools" 
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical" >
+    android:orientation="vertical" > 
+    
+    <EditText
+         android:id="@+id/recordSearchText"
+         android:layout_width="match_parent"
+         android:layout_height="wrap_content"
+         android:ems="10"
+         android:hint="@string/search_text" >
+    </EditText>
+	
+    <LinearLayout
+        android:layout_width="match_parent" 
+        android:layout_height="wrap_content" 
+        android:orientation="horizontal" >
 
-      <LinearLayout
-         android:layout_width="match_parent" 
-         android:layout_height="wrap_content" > 
+        <Button
+	        android:id="@+id/recordDateStartButton"
+	        style="?android:attr/buttonStyleSmall"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text="@string/date_start" />
+        
+        <TextView
+            android:id="@+id/recordDatetoTextview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/date_to" />
+        
+        <Button
+	        android:id="@+id/recordDateEndButton"
+	        style="?android:attr/buttonStyleSmall"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text="@string/date_end" />
+        
+    </LinearLayout>
+    
+	<LinearLayout
+        android:layout_width="match_parent" 
+        android:layout_height="wrap_content" 
+        android:orientation="horizontal" >
+            
+	    <Button
+	        android:id="@+id/recordDateButton"
+	        style="?android:attr/buttonStyleSmall"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text="@string/sort_date" />
+	    <Button
+	        android:id="@+id/recordTypeButton"
+	        style="?android:attr/buttonStyleSmall"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text="@string/sort_type" />
+	    <Button
+	        android:id="@+id/recordEntryButton"
+	        style="?android:attr/buttonStyleSmall"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text="@string/sort_entry" />
+	    <Button
+	        android:id="@+id/recordInoroutButton"
+	        style="?android:attr/buttonStyleSmall"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text="@string/sort_inorout" />
+	    <Button
+	        android:id="@+id/recordStatusButton"
+	        style="?android:attr/buttonStyleSmall"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text="@string/sort_status" />
+	    
+    </LinearLayout>
 
-         <EditText 
-             android:id="@+id/recordSearchText" 
-             android:layout_width="wrap_content" 
-             android:layout_height="wrap_content" 
-             android:layout_weight="1" 
-             android:hint = "@string/search_text" 
-             android:ems="10" > 
-
-             <requestFocus /> 
-         </EditText> 
-
-     </LinearLayout>  
+    
 
     <ListView
         android:id="@id/android:list"

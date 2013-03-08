@@ -8,6 +8,7 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 
@@ -15,10 +16,12 @@ import com.android.app.warehousemanagement.db.InnerDBExec;
 import com.android.app.warehousemanagement.db.InnerDBTable;
 
 public class CurrentFragment extends ListFragment
-		                     implements TextWatcher {
+		                     implements TextWatcher, View.OnClickListener {
 			
 	private InnerDBExec db = null;
 	private SimpleCursorAdapter mAdapter = null;
+	private String sortBy = "";
+	private String keyword = "";
 	private String[] fromColumns = new String[] {
 			InnerDBTable.Current.COLUMN_NAME_ENTRY_NAME,
 			InnerDBTable.Current.COLUMN_NAME_ENTRY_TYPE,
@@ -43,7 +46,7 @@ public class CurrentFragment extends ListFragment
         
         mAdapter= new SimpleCursorAdapter(getActivity(),
           		R.layout.current_list_item,
-           		db.currentSelectAll(),
+           		db.currentSearch("", ""),
            		fromColumns,
            		toViews,
            		0);
@@ -59,8 +62,42 @@ public class CurrentFragment extends ListFragment
     	
     	EditText editText = (EditText)getView().findViewById(R.id.currentSearchText);
         editText.addTextChangedListener(this);
+        
+        Button currentTypeButton = (Button)getView().findViewById(R.id.currentTypeButton);
+        currentTypeButton.setOnClickListener(this);
+        Button currentEntryButton = (Button)getView().findViewById(R.id.currentEntryButton);
+        currentEntryButton.setOnClickListener(this);
     }
     
+	@Override
+    public void onClick(View v){
+    	int buttonId = v.getId();
+    	String[] sortDetail = sortBy.split(" ");
+    	String sortColumn = "";
+    	
+    	switch (buttonId){
+    	case R.id.currentTypeButton:
+    		sortColumn = InnerDBTable.Current.COLUMN_NAME_ENTRY_TYPE;
+    		break;
+    	case R.id.currentEntryButton:
+    		sortColumn = InnerDBTable.Current.COLUMN_NAME_ENTRY_NAME;
+    		break;
+    	}
+    	
+    	if (sortDetail[0].equals(sortColumn) ){
+			if (sortDetail.length == 2)
+				sortBy = sortColumn;
+			else
+				sortBy = "";
+		}
+		else {
+			sortBy = sortColumn + " DESC";
+		}
+    	
+    	mAdapter.swapCursor(db.currentSearch(keyword, sortBy));
+    }
+	
+	
     @Override
     public void afterTextChanged(Editable s) {
 
@@ -75,8 +112,9 @@ public class CurrentFragment extends ListFragment
     @Override
 	public void onTextChanged(CharSequence s, int start, int before,
 			int count) {
-		mAdapter.swapCursor(db.currentSearch(s.toString()));
-
+    	
+    	keyword = s.toString();
+		mAdapter.swapCursor(db.currentSearch(keyword, sortBy));
 	}
 	
     @Override
