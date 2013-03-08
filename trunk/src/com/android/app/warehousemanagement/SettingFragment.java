@@ -28,7 +28,7 @@ public class SettingFragment extends ListFragment{
         Bundle savedInstanceState) {
 		
 		InnerDBExec db = new InnerDBExec(getActivity());
-		Cursor c = db.recordSelectAll();
+		Cursor c = db.recordSearch("", "", "", "");
 		items = new String[9];
 		for (int i=0; i<c.getCount(); i++){
 			items[i] = c.getString(i);
