@@ -4,6 +4,7 @@ import java.util.Calendar;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.ListFragment;
@@ -33,6 +34,7 @@ public class RecordFragment extends ListFragment
     		InnerDBTable.Record.COLUMN_NAME_ENTRY_NAME,
     		InnerDBTable.Record.COLUMN_NAME_INOROUT,
     		InnerDBTable.Record.COLUMN_NAME_AMOUNT,
+    		InnerDBTable.Record.COLUMN_NAME_UNIT,
     		InnerDBTable.Record.COLUMN_NAME_STATUS
     };
 	private int[] toViews = new int[] {
@@ -41,6 +43,7 @@ public class RecordFragment extends ListFragment
     		R.id.recordEntryTextView,
     		R.id.recordInoroutTextView,
     		R.id.recordAmountTextView,
+    		R.id.recordUnitTextView,
     		R.id.recordStatusTextView
     };
 	
@@ -76,7 +79,9 @@ public class RecordFragment extends ListFragment
             int year = bundle.getInt("year");
             int month = bundle.getInt("month");
             int day = bundle.getInt("day");
-            return new DatePickerDialog(getActivity(), this, year, month, day);
+            DatePickerDialog datePicker = new DatePickerDialog(getActivity(), this, year, month, day);
+            datePicker.setOnCancelListener(this);
+            return datePicker;
 		}
 		
 		@Override
