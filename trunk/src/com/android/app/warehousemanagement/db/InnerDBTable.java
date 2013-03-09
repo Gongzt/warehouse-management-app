@@ -14,6 +14,7 @@ public abstract class InnerDBTable {
 		public static final String COLUMN_NAME_WAREHOUSE = "warehouse";
 		public static final String COLUMN_NAME_AMOUNT = "amount";
 		public static final String COLUMN_NAME_ENTRY_TYPE = "type";
+		public static final String COLUMN_NAME_UNIT = "unit";
 		
 	}
 	
@@ -28,6 +29,7 @@ public abstract class InnerDBTable {
 		public static final String COLUMN_NAME_INOROUT = "inorout";
 		public static final String COLUMN_NAME_REMARK = "remark";
 		public static final String COLUMN_NAME_STATUS = "status";
+		public static final String COLUMN_NAME_UNIT = "unit";
 	}
 	
 

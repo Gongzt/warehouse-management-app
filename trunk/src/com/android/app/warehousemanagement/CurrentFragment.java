@@ -25,12 +25,14 @@ public class CurrentFragment extends ListFragment
 	private String[] fromColumns = new String[] {
 			InnerDBTable.Current.COLUMN_NAME_ENTRY_NAME,
 			InnerDBTable.Current.COLUMN_NAME_ENTRY_TYPE,
-			InnerDBTable.Current.COLUMN_NAME_AMOUNT
+			InnerDBTable.Current.COLUMN_NAME_AMOUNT,
+			InnerDBTable.Current.COLUMN_NAME_UNIT
 	};
 	private int[] toViews = new int[] {
 			R.id.currentEntryTextView,
 			R.id.currentTypeTextView,
-			R.id.currentAmountTextView
+			R.id.currentAmountTextView,
+			R.id.currentUnitTextView
 	};
 	
     @Override

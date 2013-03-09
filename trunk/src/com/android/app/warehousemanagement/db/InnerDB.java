@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class InnerDB extends SQLiteOpenHelper{
 
-	public static final int DATABASE_VERSION = 2;
+	public static final int DATABASE_VERSION = 1;
 	public static final String DATABASE_NAME = "Warehouse.db";
 	private static final String INTEGER_TYPE = " Integer";
 	private static final String TEXT_TYPE = " VARCHAR";
@@ -19,7 +19,8 @@ public class InnerDB extends SQLiteOpenHelper{
 			InnerDBTable.Current.COLUMN_NAME_ENTRY_NAME + TEXT_TYPE + COMMA_SEP +
 			InnerDBTable.Current.COLUMN_NAME_ENTRY_TYPE + TEXT_TYPE + COMMA_SEP +
 			InnerDBTable.Current.COLUMN_NAME_WAREHOUSE + TEXT_TYPE + COMMA_SEP +
-			InnerDBTable.Current.COLUMN_NAME_AMOUNT + INTEGER_TYPE +
+			InnerDBTable.Current.COLUMN_NAME_AMOUNT + INTEGER_TYPE + COMMA_SEP +
+			InnerDBTable.Current.COLUMN_NAME_UNIT + TEXT_TYPE +
 			" )";
 	
 	private static final String SQL_CREATE_RECORD = 
@@ -32,7 +33,8 @@ public class InnerDB extends SQLiteOpenHelper{
 			InnerDBTable.Record.COLUMN_NAME_REMARK + TEXT_TYPE + COMMA_SEP +
 			InnerDBTable.Record.COLUMN_NAME_STATUS + TEXT_TYPE + COMMA_SEP +
 			InnerDBTable.Record.COLUMN_NAME_DATE + TEXT_TYPE + COMMA_SEP +
-			InnerDBTable.Current.COLUMN_NAME_AMOUNT + INTEGER_TYPE +
+			InnerDBTable.Record.COLUMN_NAME_AMOUNT + INTEGER_TYPE + COMMA_SEP +
+			InnerDBTable.Record.COLUMN_NAME_UNIT + TEXT_TYPE + 
 			" )";
 	
 	private static final String SQL_DELETE_CURRENT =    
@@ -51,66 +53,66 @@ public class InnerDB extends SQLiteOpenHelper{
 		db.execSQL(SQL_CREATE_RECORD);
 		
 		// Initiate Current table
-		String insertSql = "INSERT INTO Current (entryname, warehouse, amount, type) values ('油漆100ml', '总仓库', 5, '原料')";
+		String insertSql = "INSERT INTO Current (entryname, warehouse, amount, type, unit) values ('油漆100ml', '总仓库', 5, '原料', '罐')";
 		db.execSQL(insertSql);
-		insertSql = "INSERT INTO Current (entryname, warehouse, amount, type) values ('油漆100ml', '佛山仓库', 6, '原料')";
+		insertSql = "INSERT INTO Current (entryname, warehouse, amount, type, unit) values ('油漆100ml', '佛山仓库', 6, '原料', '罐')";
 		db.execSQL(insertSql);
-		insertSql = "INSERT INTO Current (entryname, warehouse, amount, type) values ('油漆100ml', '广州仓库', 2, '原料')";
+		insertSql = "INSERT INTO Current (entryname, warehouse, amount, type, unit) values ('油漆100ml', '广州仓库', 2, '原料', '罐')";
 		db.execSQL(insertSql);
-		insertSql = "INSERT INTO Current (entryname, warehouse, amount, type) values ('油漆200ml', '总仓库', 1, '原料')";
+		insertSql = "INSERT INTO Current (entryname, warehouse, amount, type, unit) values ('油漆200ml', '总仓库', 1, '原料', '罐')";
 		db.execSQL(insertSql);
-		insertSql = "INSERT INTO Current (entryname, warehouse, amount, type) values ('油漆200ml', '广州仓库', 1, '原料')";
+		insertSql = "INSERT INTO Current (entryname, warehouse, amount, type, unit) values ('油漆200ml', '广州仓库', 1, '原料', '罐')";
 		db.execSQL(insertSql);
-		insertSql = "INSERT INTO Current (entryname, warehouse, amount, type) values ('油漆200ml', '佛山仓库', 1, '原料')";
+		insertSql = "INSERT INTO Current (entryname, warehouse, amount, type, unit) values ('油漆200ml', '佛山仓库', 1, '原料', '罐')";
 		db.execSQL(insertSql);
-		insertSql = "INSERT INTO Current (entryname, warehouse, amount, type) values ('双铜纸100*100', '总仓库', 2, '原料')";
+		insertSql = "INSERT INTO Current (entryname, warehouse, amount, type, unit) values ('双铜纸100*100', '总仓库', 2, '原料', '吨')";
 		db.execSQL(insertSql);
-		insertSql = "INSERT INTO Current (entryname, warehouse, amount, type) values ('双铜纸200*100', '总仓库', 3, '原料')";
+		insertSql = "INSERT INTO Current (entryname, warehouse, amount, type, unit) values ('双铜纸200*100', '总仓库', 3, '原料', '吨')";
 		db.execSQL(insertSql);
-		insertSql = "INSERT INTO Current (entryname, warehouse, amount, type) values ('双铜纸100*100', '总仓库', 1, '产品')";
+		insertSql = "INSERT INTO Current (entryname, warehouse, amount, type, unit) values ('双铜纸100*100', '总仓库', 1, '产品', '吨')";
 		db.execSQL(insertSql);
-		insertSql = "INSERT INTO Current (entryname, warehouse, amount, type) values ('双铜纸100*100', '佛山仓库', 6, '产品')";
+		insertSql = "INSERT INTO Current (entryname, warehouse, amount, type, unit) values ('双铜纸100*100', '佛山仓库', 6, '产品', '吨')";
 		db.execSQL(insertSql);
-		insertSql = "INSERT INTO Current (entryname, warehouse, amount, type) values ('ST&SAT盒子', '总仓库', 6, '产品')";
+		insertSql = "INSERT INTO Current (entryname, warehouse, amount, type, unit) values ('ST&SAT盒子', '总仓库', 6, '产品', '个')";
 		db.execSQL(insertSql);
-		insertSql = "INSERT INTO Current (entryname, warehouse, amount, type) values ('ST&SAT盒子', '佛山仓库', 3, '产品')";
+		insertSql = "INSERT INTO Current (entryname, warehouse, amount, type, unit) values ('ST&SAT盒子', '佛山仓库', 3, '产品', '个')";
 		db.execSQL(insertSql);
-		insertSql = "INSERT INTO Current (entryname, warehouse, amount, type) values ('ST&SAT盒子', '广州仓库', 12, '产品')";
+		insertSql = "INSERT INTO Current (entryname, warehouse, amount, type, unit) values ('ST&SAT盒子', '广州仓库', 12, '产品', '个')";
 		db.execSQL(insertSql);
-		insertSql = "INSERT INTO Current (entryname, warehouse, amount, type) values ('华伦盒子', '广州仓库', 11, '产品')";
+		insertSql = "INSERT INTO Current (entryname, warehouse, amount, type, unit) values ('华伦盒子', '广州仓库', 11, '产品', '个')";
 		db.execSQL(insertSql);
-		insertSql = "INSERT INTO Current (entryname, warehouse, amount, type) values ('华伦盒子', '佛山仓库', 5, '产品')";
+		insertSql = "INSERT INTO Current (entryname, warehouse, amount, type, unit) values ('华伦盒子', '佛山仓库', 5, '产品', '个')";
 		db.execSQL(insertSql);
-		insertSql = "INSERT INTO Current (entryname, warehouse, amount, type) values ('哈哈盒子', '总仓库', 12, '产品')";
+		insertSql = "INSERT INTO Current (entryname, warehouse, amount, type, unit) values ('哈哈盒子', '总仓库', 12, '产品', '个')";
 		db.execSQL(insertSql);
 		
 		//initiate record database
-		insertSql = "INSERT INTO Record (entryname, warehouse, amount, type, inorout, remark, status, date) values " +
-				"('油漆100ml', '总仓库', 2, '原料', '入库', '荣盛发货', '审核', '201204051203')";
+		insertSql = "INSERT INTO Record (entryname, warehouse, amount, type, inorout, remark, status, date, unit) values " +
+				"('油漆100ml', '总仓库', 2, '原料', '入库', '荣盛发货', '审核', '201204051203', '罐')";
 		db.execSQL(insertSql);
-		insertSql = "INSERT INTO Record (entryname, warehouse, amount, type, inorout, remark, status, date) values " +
-				"('油漆100ml', '佛山仓库', 1, '原料', '入库', '荣盛发货', '审核', '201203060900')";
+		insertSql = "INSERT INTO Record (entryname, warehouse, amount, type, inorout, remark, status, date, unit) values " +
+				"('油漆100ml', '佛山仓库', 1, '原料', '入库', '荣盛发货', '审核', '201203060900', '罐')";
 		db.execSQL(insertSql);
-		insertSql = "INSERT INTO Record (entryname, warehouse, amount, type, inorout, remark, status, date) values " +
-				"('油漆100ml', '总仓库', 1, '原料', '出库', '星期六订单', '审核', '201205051600')";
+		insertSql = "INSERT INTO Record (entryname, warehouse, amount, type, inorout, remark, status, date, unit) values " +
+				"('油漆100ml', '总仓库', 1, '原料', '出库', '星期六订单', '审核', '201205051600', '罐')";
 		db.execSQL(insertSql);
-		insertSql = "INSERT INTO Record (entryname, warehouse, amount, type, inorout, remark, status, date) values " +
-				"('油漆100ml', '广州仓库', 2, '原料', '出库', '星期六订单', '审核', '201205060900')";
+		insertSql = "INSERT INTO Record (entryname, warehouse, amount, type, inorout, remark, status, date, unit) values " +
+				"('油漆100ml', '广州仓库', 2, '原料', '出库', '星期六订单', '审核', '201205060900', '罐')";
 		db.execSQL(insertSql);
-		insertSql = "INSERT INTO Record (entryname, warehouse, amount, type, inorout, remark, status, date) values " +
-				"('ST&SAT盒子', '总仓库', 2, '产品', '入库', '星期六订单', '审核', '201206061400')";
+		insertSql = "INSERT INTO Record (entryname, warehouse, amount, type, inorout, remark, status, date, unit) values " +
+				"('ST&SAT盒子', '总仓库', 2, '产品', '入库', '星期六订单', '审核', '201206061400', '个')";
 		db.execSQL(insertSql);
-		insertSql = "INSERT INTO Record (entryname, warehouse, amount, type, inorout, remark, status, date) values " +
-				"('ST&SAT盒子', '佛山仓库', 5, '产品', '入库', '星期六订单', '审核', '201206061500')";
+		insertSql = "INSERT INTO Record (entryname, warehouse, amount, type, inorout, remark, status, date, unit) values " +
+				"('ST&SAT盒子', '佛山仓库', 5, '产品', '入库', '星期六订单', '审核', '201206061500', '个')";
 		db.execSQL(insertSql);
-		insertSql = "INSERT INTO Record (entryname, warehouse, amount, type, inorout, remark, status, date) values " +
-				"('哈哈盒子', '总仓库', 1, '产品', '出库', '哈哈订单', '审核', '201207081600')";
+		insertSql = "INSERT INTO Record (entryname, warehouse, amount, type, inorout, remark, status, date, unit) values " +
+				"('哈哈盒子', '总仓库', 1, '产品', '出库', '哈哈订单', '审核', '201207081600', '个')";
 		db.execSQL(insertSql);
-		insertSql = "INSERT INTO Record (entryname, warehouse, amount, type, inorout, remark, status, date) values " +
-				"('ST&SAT盒子', '总仓库', 7, '产品', '出库', '星期六订单', '待审', '201207081023')";
+		insertSql = "INSERT INTO Record (entryname, warehouse, amount, type, inorout, remark, status, date, unit) values " +
+				"('ST&SAT盒子', '总仓库', 7, '产品', '出库', '星期六订单', '待审', '201207081023', '个')";
 		db.execSQL(insertSql);
-		insertSql = "INSERT INTO Record (entryname, warehouse, amount, type, inorout, remark, status, date) values " +
-				"('双铜纸100*100', '广州仓库', 2, '原料', '出库', '百丽发货', '待审', '201204201502')";
+		insertSql = "INSERT INTO Record (entryname, warehouse, amount, type, inorout, remark, status, date, unit) values " +
+				"('双铜纸100*100', '广州仓库', 2, '原料', '出库', '百丽发货', '待审', '201204201502', '吨')";
 		db.execSQL(insertSql);
 		
 	}

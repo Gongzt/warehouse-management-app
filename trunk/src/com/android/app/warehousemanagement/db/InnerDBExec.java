@@ -55,6 +55,7 @@ public class InnerDBExec{
 				InnerDBTable.Current.COLUMN_NAME_ENTRY_ID,
 				InnerDBTable.Current.COLUMN_NAME_ENTRY_NAME,
 				InnerDBTable.Current.COLUMN_NAME_ENTRY_TYPE,
+				InnerDBTable.Current.COLUMN_NAME_UNIT,
 				"SUM(" + InnerDBTable.Current.COLUMN_NAME_AMOUNT + ") AS " + InnerDBTable.Current.COLUMN_NAME_AMOUNT 
 		};
 		String selection = 
@@ -74,7 +75,7 @@ public class InnerDBExec{
 	}
 	
 	//update the product(material) amount, if product(material) not exist, insert it
-	public long currentUpdate (String name, String type, String warehouse, int change) {
+	public long currentUpdate (String name, String type, String warehouse, int change, String unit) {
 		
 		SQLiteDatabase readableDB = dbHelper.getReadableDatabase();
 		
@@ -115,6 +116,7 @@ public class InnerDBExec{
 			values.put(InnerDBTable.Current.COLUMN_NAME_ENTRY_TYPE, type);
 			values.put(InnerDBTable.Current.COLUMN_NAME_WAREHOUSE, warehouse);
 			values.put(InnerDBTable.Current.COLUMN_NAME_AMOUNT, amount+change);
+			values.put(InnerDBTable.Current.COLUMN_NAME_UNIT, unit);
 			
 			writableDB.insert(InnerDBTable.Current.TABLE_NAME, "null", values);
 		}
@@ -149,6 +151,7 @@ public class InnerDBExec{
 				InnerDBTable.Record.COLUMN_NAME_ENTRY_TYPE,
 				InnerDBTable.Record.COLUMN_NAME_WAREHOUSE,
 				InnerDBTable.Record.COLUMN_NAME_AMOUNT,
+				InnerDBTable.Record.COLUMN_NAME_UNIT,
 				InnerDBTable.Record.COLUMN_NAME_INOROUT,
 				InnerDBTable.Record.COLUMN_NAME_STATUS,
 				InnerDBTable.Record.COLUMN_NAME_REMARK,
@@ -180,7 +183,7 @@ public class InnerDBExec{
 	}
 	
 	//insert a new record into the Record table
-	public void recordInsert(String entryName, String entryType, String warehouse, int amount, String inOrOut, String status, String remark, Calendar calendar){
+	public void recordInsert(String entryName, String entryType, String warehouse, int amount, String unit, String inOrOut, String status, String remark, Calendar calendar){
 		SQLiteDatabase writableDB = dbHelper.getWritableDatabase();
 		
 		ContentValues values = new ContentValues();
@@ -188,6 +191,7 @@ public class InnerDBExec{
 		values.put(InnerDBTable.Record.COLUMN_NAME_ENTRY_TYPE, entryType);
 		values.put(InnerDBTable.Record.COLUMN_NAME_WAREHOUSE, warehouse);
 		values.put(InnerDBTable.Record.COLUMN_NAME_AMOUNT, amount);
+		values.put(InnerDBTable.Record.COLUMN_NAME_UNIT, unit);
 		values.put(InnerDBTable.Record.COLUMN_NAME_INOROUT, inOrOut);
 		values.put(InnerDBTable.Record.COLUMN_NAME_STATUS, status);
 		values.put(InnerDBTable.Record.COLUMN_NAME_REMARK, remark);
