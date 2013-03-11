@@ -32,5 +32,11 @@ public abstract class InnerDBTable {
 		public static final String COLUMN_NAME_UNIT = "unit";
 	}
 	
+	public static abstract class Warehouse implements BaseColumns{
+		public static final String TABLE_NAME = "Warehouse";
+		public static final String COLUMN_NAME_WAREHOUSE_ID = "_id";
+		public static final String COLUMN_NAME_WAREHOUSE_NAME = "warehousename";
+	}
+	
 
 }
