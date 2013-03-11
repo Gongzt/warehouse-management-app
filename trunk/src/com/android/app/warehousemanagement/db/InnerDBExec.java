@@ -45,6 +45,32 @@ public class InnerDBExec{
 		return result;
 	}
 	
+	public String[] currentSelectByName(String name){
+		
+		SQLiteDatabase readableDB = dbHelper.getReadableDatabase();
+		
+		String[] projection = {
+				InnerDBTable.Current.COLUMN_NAME_ENTRY_TYPE,
+				InnerDBTable.Current.COLUMN_NAME_UNIT,
+		};
+		String selection = InnerDBTable.Current.COLUMN_NAME_ENTRY_NAME + " = ?";
+		String[] selectionArgs = {name};
+		String groupBy = InnerDBTable.Current.COLUMN_NAME_ENTRY_NAME;
+		String having = null;
+		String orderBy = null;
+		String limit = null;
+		
+		Cursor c = readableDB.query(InnerDBTable.Current.TABLE_NAME, projection, selection, selectionArgs, groupBy, having, orderBy, limit);
+		
+		String[] result = new String[2];
+		c.moveToFirst();
+		result[0] = c.getString(0);
+		result[1] = c.getString(1);
+
+		readableDB.close();
+		return result;
+	}
+	
 	//search the product(material) relative to the keyword
 	//return order: entryid, entryname, type, amount
 	public Cursor currentSearch(String keyword, String sortBy){
@@ -230,6 +256,32 @@ public class InnerDBExec{
 		writableDB.delete(InnerDBTable.Record.TABLE_NAME, selection, selectionArgs);
 		
 		writableDB.close();
+	}
+	
+	public String[] warehouseSelectAll(){
+		SQLiteDatabase readableDB = dbHelper.getReadableDatabase();
+		
+		String[] projection = {
+				InnerDBTable.Warehouse.COLUMN_NAME_WAREHOUSE_NAME
+		};
+		String selection = "";
+		String[] selectionArgs = null;
+		String groupBy = null;
+		String having = null;
+		String orderBy = "";
+		String limit = null;
+		
+		Cursor c = readableDB.query(InnerDBTable.Warehouse.TABLE_NAME, projection, selection, selectionArgs, groupBy, having, orderBy, limit);
+		c.moveToFirst();
+
+		String[] result = new String[c.getCount()];
+		for (int i = 0; i<c.getCount(); i++){
+			result[i] = c.getString(0);
+			c.moveToNext();
+		}
+		
+		readableDB.close();
+		return result;
 	}
 	
 	private String parseDate(Calendar calendar){

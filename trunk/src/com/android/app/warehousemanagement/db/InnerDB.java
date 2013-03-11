@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class InnerDB extends SQLiteOpenHelper{
 
-	public static final int DATABASE_VERSION = 1;
+	public static final int DATABASE_VERSION = 2;
 	public static final String DATABASE_NAME = "Warehouse.db";
 	private static final String INTEGER_TYPE = " Integer";
 	private static final String TEXT_TYPE = " VARCHAR";
@@ -37,11 +37,20 @@ public class InnerDB extends SQLiteOpenHelper{
 			InnerDBTable.Record.COLUMN_NAME_UNIT + TEXT_TYPE + 
 			" )";
 	
+	private static final String SQL_CREATE_WAREHOUSE =    
+			"CREATE TABLE " + InnerDBTable.Warehouse.TABLE_NAME + " (" +
+			InnerDBTable.Warehouse.COLUMN_NAME_WAREHOUSE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
+			InnerDBTable.Warehouse.COLUMN_NAME_WAREHOUSE_NAME + TEXT_TYPE + 
+			" )";
+	
 	private static final String SQL_DELETE_CURRENT =    
 			"DROP TABLE IF EXISTS " + InnerDBTable.Current.TABLE_NAME;
 	
 	private static final String SQL_DELETE_RECORD =    
 			"DROP TABLE IF EXISTS " + InnerDBTable.Record.TABLE_NAME;
+	
+	private static final String SQL_DELETE_WAREHOUSE =    
+			"DROP TABLE IF EXISTS " + InnerDBTable.Warehouse.TABLE_NAME;
 	
 	public InnerDB(Context context){
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -51,6 +60,7 @@ public class InnerDB extends SQLiteOpenHelper{
 	public void onCreate(SQLiteDatabase db){
 		db.execSQL(SQL_CREATE_CURRENT);
 		db.execSQL(SQL_CREATE_RECORD);
+		db.execSQL(SQL_CREATE_WAREHOUSE);
 		
 		// Initiate Current table
 		String insertSql = "INSERT INTO Current (entryname, warehouse, amount, type, unit) values ('油漆100ml', '总仓库', 5, '原料', '罐')";
@@ -115,12 +125,21 @@ public class InnerDB extends SQLiteOpenHelper{
 				"('双铜纸100*100', '广州仓库', 2, '原料', '出库', '百丽发货', '待审', '201204201502', '吨')";
 		db.execSQL(insertSql);
 		
+		//initiate record database
+				insertSql = "INSERT INTO Warehouse (warehousename) values ('总仓库')";
+				db.execSQL(insertSql);
+				insertSql = "INSERT INTO Warehouse (warehousename) values ('佛山仓库')";
+				db.execSQL(insertSql);
+				insertSql = "INSERT INTO Warehouse (warehousename) values ('广州仓库')";
+				db.execSQL(insertSql);
+		
 	}
 	
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion){
 		db.execSQL(SQL_DELETE_CURRENT);
 		db.execSQL(SQL_DELETE_RECORD);
+		db.execSQL(SQL_DELETE_WAREHOUSE);
 		onCreate(db);
 	}
 	
