@@ -237,7 +237,7 @@ public class InnerDBExec{
 		
 		Calendar calendar = Calendar.getInstance();
 		ContentValues values = new ContentValues();
-		values.put(InnerDBTable.Record.COLUMN_NAME_STATUS, "ÉóÅú");
+		values.put(InnerDBTable.Record.COLUMN_NAME_STATUS, "Í¨¹ý");
 		values.put(InnerDBTable.Record.COLUMN_NAME_DATE, parseDate(calendar));
 		
 		writableDB.update(InnerDBTable.Record.TABLE_NAME, values, selection, selectionArgs);

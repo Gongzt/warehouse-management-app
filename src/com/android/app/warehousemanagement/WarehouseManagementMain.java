@@ -1,10 +1,15 @@
-package com.android.app.warehousemanagement;
+	package com.android.app.warehousemanagement;
 
+import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.view.Gravity;
 import android.view.Menu;
-import android.view.Window;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TabHost;
+import android.widget.TextView;
 
 public class WarehouseManagementMain extends FragmentActivity {
 	
@@ -16,10 +21,8 @@ public class WarehouseManagementMain extends FragmentActivity {
 		super.onCreate(savedInstanceState);
         
 		// customized title
-		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE); // 注意顺序   
-		setContentView(R.layout.warehouse_management_main); // 注意顺序   
-        getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.customized_title);  // 注意顺序   
-        
+		setContentView(R.layout.warehouse_management_main); // 注意顺序      
+		
 		setupTabHost(0);
 	}
 
@@ -38,18 +41,46 @@ public class WarehouseManagementMain extends FragmentActivity {
 	    
 	    tabHost.setCurrentTab(currentTabNum);
 	    
+	    TabView view = new TabView(this, R.drawable.tab_current, "库  存");
 		tabManager.addTab(
-				tabHost.newTabSpec("CurrentFragment").setIndicator("库存现状"),
+				tabHost.newTabSpec("CurrentFragment").setIndicator(view),
 				CurrentFragment.class, null);
+		view = new TabView(this, R.drawable.tab_instock, "入  库");
 		tabManager.addTab(
-				tabHost.newTabSpec("InStockFragment").setIndicator("入库"),
+				tabHost.newTabSpec("InStockFragment").setIndicator(view),
 				InStockFragment.class, null);
+		view = new TabView(this, R.drawable.tab_record, "历  史");
 		tabManager.addTab(
-				tabHost.newTabSpec("RecordFragment").setIndicator("历史"),
+				tabHost.newTabSpec("RecordFragment").setIndicator(view),
 				RecordFragment.class, null);
+		view = new TabView(this, R.drawable.tab_setting, "设  置");
 		tabManager.addTab(
-				tabHost.newTabSpec("SettingFragment").setIndicator("设置"),
+				tabHost.newTabSpec("SettingFragment").setIndicator(view),
 				SettingFragment.class, null);
+    }
+    
+    private class TabView extends LinearLayout {    
+    	private ImageView imageView ;  
+    	private TextView textView;  
+    	          
+    	public TabView(Context c, int icon, String text) {  
+    		super(c);  
+    		setOrientation(VERTICAL);  
+    		setGravity(Gravity.CENTER);  
+    		             
+    		imageView = new ImageView(c);  
+    		imageView.setImageDrawable(this.getResources().getDrawable(icon));  
+    		imageView.setBackgroundColor(Color.TRANSPARENT);  
+    		addView(imageView);  
+    		  
+    		textView = new TextView(c);  
+    		textView.setText(text);    
+    		textView.setGravity(Gravity.CENTER);
+    		textView.setTextColor(Color.rgb(255, 255, 255));
+    		addView(textView);  
+    		
+    		setBackgroundResource(R.drawable.tab);
+    	}  
     }
 
 }
