@@ -2,31 +2,37 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingBottom="5dip"
+    android:paddingTop="5dip"
     android:orientation="horizontal" >
 
+		<ImageView      
+		    style="@style/ColumnEntryCurrent"
+            android:layout_weight="3"
+            android:gravity="center"     
+			android:id="@+id/currentTypeImage"
+			android:contentDescription="@string/sort_type">      
+		</ImageView>   
+    
         <TextView
             android:id="@+id/currentEntryTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="TextView" />
-
-        <TextView
-            android:id="@+id/currentTypeTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            style="@style/ColumnEntryCurrent"
+            android:layout_weight="5"
+            android:gravity="center|right"
             android:text="TextView" />
         
         <TextView
             android:id="@+id/currentAmountTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            style="@style/ColumnEntryCurrent"
+            android:layout_weight="2"
+            android:gravity="center|right"
             android:text="TextView" />
         
         <TextView
             android:id="@+id/currentUnitTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            style="@style/ColumnEntryCurrent"
+            android:layout_weight="1"
+            android:gravity="center|left"
             android:text="TextView" />	
-        	
 
 </LinearLayout>

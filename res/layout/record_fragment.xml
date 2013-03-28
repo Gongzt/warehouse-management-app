@@ -5,79 +5,74 @@
     android:layout_height="match_parent"
     android:orientation="vertical" > 
     
-    <EditText
-         android:id="@+id/recordSearchText"
-         android:layout_width="match_parent"
-         android:layout_height="wrap_content"
-         android:ems="10"
-         android:hint="@string/search_text" >
-    </EditText>
+   <SearchView
+		android:id="@+id/recordSearchBar"
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:focusable="true"
+	    android:queryHint="@string/search_text" >
+	</SearchView>
 	
     <LinearLayout
         android:layout_width="match_parent" 
-        android:layout_height="wrap_content" 
+        android:layout_height="35dip" 
+        android:layout_marginBottom="5dip"
         android:orientation="horizontal" >
 
         <Button
 	        android:id="@+id/recordDateStartButton"
-	        style="?android:attr/buttonStyleSmall"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
+	        style="@style/DateButton"
+	        android:layout_weight= "11"
 	        android:text="@string/date_start" />
         
         <TextView
             android:id="@+id/recordDatetoTextview"
-            android:layout_width="wrap_content"
+            android:layout_width="0dip"
+            android:layout_weight= "1"
             android:layout_height="wrap_content"
+            android:textSize="14sp"
             android:text="@string/date_to" />
         
         <Button
 	        android:id="@+id/recordDateEndButton"
-	        style="?android:attr/buttonStyleSmall"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
+	        style="@style/DateButton"
+	        android:layout_weight= "11"
 	        android:text="@string/date_end" />
         
     </LinearLayout>
     
 	<LinearLayout
         android:layout_width="match_parent" 
-        android:layout_height="wrap_content" 
+        android:layout_height="35dip" 
         android:orientation="horizontal" >
             
 	    <Button
 	        android:id="@+id/recordDateButton"
-	        style="?android:attr/buttonStyleSmall"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:text="@string/sort_date" />
-	    <Button
-	        android:id="@+id/recordTypeButton"
-	        style="?android:attr/buttonStyleSmall"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:text="@string/sort_type" />
-	    <Button
-	        android:id="@+id/recordEntryButton"
-	        style="?android:attr/buttonStyleSmall"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:text="@string/sort_entry" />
+			style="@style/ColumnButtonRecord"
+	        android:text="@string/sort_date" 
+	        android:layout_weight= "1"/>
 	    <Button
 	        android:id="@+id/recordInoroutButton"
-	        style="?android:attr/buttonStyleSmall"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:text="@string/sort_inorout" />
+	        style="@style/ColumnButtonRecord"
+	        android:text="@string/sort_inorout"
+	        android:layout_weight= "1" />
+	    <Button
+	        android:id="@+id/recordTypeButton"
+	        style="@style/ColumnButtonRecord"
+	        android:text="@string/sort_type"
+	        android:layout_weight= "1" />
 	    <Button
 	        android:id="@+id/recordStatusButton"
-	        style="?android:attr/buttonStyleSmall"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:text="@string/sort_status" />
-	    
+	        style="@style/ColumnButtonRecord"
+	        android:text="@string/sort_status"
+	        android:layout_weight= "1" />
+	    <Button
+	        android:id="@+id/recordEntryButton"
+	        style="@style/ColumnButtonRecord"
+	        android:text="@string/sort_entry"
+	        android:layout_weight= "1" />
+ 
     </LinearLayout>
-
     
 
     <ListView
