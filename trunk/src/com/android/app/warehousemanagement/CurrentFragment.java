@@ -1,36 +1,44 @@
 package com.android.app.warehousemanagement;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import android.content.Context;
+import android.database.Cursor;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.support.v4.widget.SimpleCursorAdapter;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.SearchView;
+import android.widget.SimpleAdapter;
 
 import com.android.app.warehousemanagement.db.InnerDBExec;
 import com.android.app.warehousemanagement.db.InnerDBTable;
 
 public class CurrentFragment extends ListFragment
-		                     implements TextWatcher, View.OnClickListener {
+		                     implements View.OnClickListener, SearchView.OnQueryTextListener{
 			
 	private InnerDBExec db = null;
-	private SimpleCursorAdapter mAdapter = null;
+	private SimpleAdapter mAdapter = null;
+	private InputMethodManager inputManager = null;
 	private String sortBy = "";
 	private String keyword = "";
-	private String[] fromColumns = new String[] {
-			InnerDBTable.Current.COLUMN_NAME_ENTRY_NAME,
+	private ArrayList<HashMap<String, Object>> list = new ArrayList<HashMap<String, Object>>();
+	private String[] fromColumns = new String[] {			
 			InnerDBTable.Current.COLUMN_NAME_ENTRY_TYPE,
+			InnerDBTable.Current.COLUMN_NAME_ENTRY_NAME,
 			InnerDBTable.Current.COLUMN_NAME_AMOUNT,
 			InnerDBTable.Current.COLUMN_NAME_UNIT
 	};
 	private int[] toViews = new int[] {
+			R.id.currentTypeImage,
 			R.id.currentEntryTextView,
-			R.id.currentTypeTextView,
 			R.id.currentAmountTextView,
 			R.id.currentUnitTextView
 	};
@@ -46,29 +54,58 @@ public class CurrentFragment extends ListFragment
 		
         db = new InnerDBExec(getActivity());
         
-        mAdapter= new SimpleCursorAdapter(getActivity(),
+        updateCursor(db.currentSearch("", ""));
+        mAdapter= new SimpleAdapter(getActivity(),
+        		list,
           		R.layout.current_list_item,
-           		db.currentSearch("", ""),
            		fromColumns,
-           		toViews,
-           		0);
+           		toViews);
         setListAdapter(mAdapter);
 		
     	return inflater.inflate(R.layout.current_fragment, container, false);
     }
-    
+	
+  	private void updateCursor(Cursor c){
+  		list.clear();
+  		
+  		c.moveToFirst();
+  		for(int i=0;i<c.getCount();i++)     
+  		{     
+  			HashMap<String, Object> map = new HashMap<String, Object>();
+  			map.put(InnerDBTable.Current.COLUMN_NAME_ENTRY_ID, c.getString(0));
+  			map.put(InnerDBTable.Current.COLUMN_NAME_ENTRY_NAME, c.getString(1));  
+  			map.put(InnerDBTable.Current.COLUMN_NAME_UNIT, c.getString(3));  
+  			map.put(InnerDBTable.Current.COLUMN_NAME_AMOUNT, c.getString(4));  
+  			if (c.getString(2).equals("²úÆ·")){
+  				map.put(InnerDBTable.Current.COLUMN_NAME_ENTRY_TYPE, R.drawable.icon_product);
+  			}
+  			else{
+  				map.put(InnerDBTable.Current.COLUMN_NAME_ENTRY_TYPE, R.drawable.icon_material);
+  			}
+  			
+  			list.add(map);    
+  			c.moveToNext();
+  		}
+  		
+  	}
+	
 	@Override
     public void onViewCreated(View view, Bundle savedInstanceState){
     	
     	super.onViewCreated(view, savedInstanceState);
-    	
-    	EditText editText = (EditText)getView().findViewById(R.id.currentSearchText);
-        editText.addTextChangedListener(this);
         
+    	SearchView searchView = (SearchView) getView().findViewById(R.id.currentSearchBar);
+        searchView.setOnQueryTextListener(this);
+        searchView.setSelected(true);
+    	
         Button currentTypeButton = (Button)getView().findViewById(R.id.currentTypeButton);
         currentTypeButton.setOnClickListener(this);
         Button currentEntryButton = (Button)getView().findViewById(R.id.currentEntryButton);
         currentEntryButton.setOnClickListener(this);
+        
+        inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE); 
+        
+        
     }
     
 	@Override
@@ -76,49 +113,70 @@ public class CurrentFragment extends ListFragment
     	int buttonId = v.getId();
     	String[] sortDetail = sortBy.split(" ");
     	String sortColumn = "";
+    	Button currentTypeButton = (Button)getView().findViewById(R.id.currentTypeButton);
+        Button currentEntryButton = (Button)getView().findViewById(R.id.currentEntryButton); 
+        Button currentButton= null;
     	
     	switch (buttonId){
     	case R.id.currentTypeButton:
     		sortColumn = InnerDBTable.Current.COLUMN_NAME_ENTRY_TYPE;
+    		currentEntryButton.setBackgroundResource(R.drawable.column_button_blue);
+    		currentEntryButton.setTextColor(Color.rgb(0, 153, 204));  
+    		currentButton = currentTypeButton;
     		break;
     	case R.id.currentEntryButton:
     		sortColumn = InnerDBTable.Current.COLUMN_NAME_ENTRY_NAME;
+    		currentTypeButton.setBackgroundResource(R.drawable.column_button_blue);
+    		currentTypeButton.setTextColor(Color.rgb(0, 153, 204));
+    		currentButton = currentEntryButton;
     		break;
     	}
     	
     	if (sortDetail[0].equals(sortColumn) ){
-			if (sortDetail.length == 2)
+			if (sortDetail.length == 2) {
 				sortBy = sortColumn;
-			else
+				currentButton.setBackgroundResource(R.drawable.column_button_orange);
+				currentButton.setTextColor(Color.rgb(255, 136, 0));
+			}
+			else{
 				sortBy = "";
+				currentButton.setBackgroundResource(R.drawable.column_button_blue);
+				currentButton.setTextColor(Color.rgb(0, 153, 204));
+			}
 		}
 		else {
 			sortBy = sortColumn + " DESC";
+			currentButton.setBackgroundResource(R.drawable.column_button_green);
+			currentButton.setTextColor(Color.rgb(102, 153, 0));
 		}
     	
-    	mAdapter.swapCursor(db.currentSearch(keyword, sortBy));
+    	updateCursor(db.currentSearch(keyword, sortBy));
+    	mAdapter.notifyDataSetChanged();
     }
 	
-	
-    @Override
-    public void afterTextChanged(Editable s) {
-
-	}
-    
-    @Override
-	public void beforeTextChanged(CharSequence s, int start, int count,
-			int after) {
-
-	}
-
-    @Override
-	public void onTextChanged(CharSequence s, int start, int before,
-			int count) {
+	@Override
+	public boolean onQueryTextChange(String str) {
     	
-    	keyword = s.toString();
-		mAdapter.swapCursor(db.currentSearch(keyword, sortBy));
+    	keyword = str;
+    	updateCursor(db.currentSearch(keyword, sortBy));
+    	mAdapter.notifyDataSetChanged();
+		
+		return false;
 	}
 	
+	@Override
+	public boolean onQueryTextSubmit(String str) {
+    	
+    	keyword = str;
+    	updateCursor(db.currentSearch(keyword, sortBy));
+    	mAdapter.notifyDataSetChanged();
+		inputManager.hideSoftInputFromWindow(
+                getActivity().getCurrentFocus().getWindowToken(),
+                InputMethodManager.HIDE_NOT_ALWAYS); 
+		
+		return false;
+	}
+
     @Override
 	public void onListItemClick(ListView listView, View view, int position, long id) {
 		super.onListItemClick(listView, view, position, id);
