@@ -3,47 +3,80 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal" >
-
-        <TextView
+	<LinearLayout
+	    style="@style/ColumnEntryRecord"
+	    android:layout_weight="5"
+	    android:orientation="vertical" >
+	    
+	    <TextView
             android:id="@+id/recordDateTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            style="@style/ColumnEntryRecord"
+	    	android:layout_height="wrap_content"
+	    	android:layout_width="wrap_content"
             android:text="TextView" />
+	    
+	    <LinearLayout
+		    android:layout_width="fill_parent"
+		    android:layout_height="wrap_content"
+		    android:orientation="horizontal" >
+		    
+	        	<ImageView      
+					    android:id="@+id/recordInoroutImage"
+			            style="@style/ColumnEntryRecord"
+		    			android:layout_width="wrap_content"
+		    			android:gravity="center"
+						android:contentDescription="@string/sort_inorout" />
+			    <TextView
+		            android:id="@+id/recordAmountTextView"
+		            style="@style/ColumnEntryRecord"
+	    			android:layout_width="wrap_content"
+	    			android:gravity="right"
+	    			android:layout_gravity="center"
+		            android:text="TextView" />
+			    <TextView
+		            android:id="@+id/recordUnitTextView"
+		            style="@style/ColumnEntryRecord"
+	    			android:layout_width="wrap_content"
+	    			android:gravity="left"
+	    			android:layout_gravity="center"
+		            android:text="TextView" />
+			    
+	    </LinearLayout>
+	    
+    </LinearLayout>
+		
+	
+		<LinearLayout
+		    style="@style/ColumnEntryRecord"
+		    android:layout_weight="6"
+		    android:orientation="vertical" >
+	    	<LinearLayout
+			    android:layout_width="fill_parent"
+			    android:layout_height="wrap_content"
+			    android:orientation="horizontal" >
+			    	<ImageView      
+					    android:id="@+id/recordTypeImage"
+			            style="@style/ColumnEntryRecord"
+				    	android:layout_width="wrap_content"
+				    	android:gravity="center"
+						android:contentDescription="@string/sort_type" />      
+				    
+			    	<ImageView      
+					    android:id="@+id/recordStatusImage"
+			            style="@style/ColumnEntryRecord"
+				    	android:layout_width="wrap_content"
+				    	android:gravity="left"
+						android:contentDescription="@string/sort_status" /> 
+				    	
+	    	</LinearLayout>
+			
+			<TextView
+	            android:id="@+id/recordEntryTextView"
+	            style="@style/ColumnEntryRecord"
+		    	android:layout_width="fill_parent"
+		    	android:gravity="left"
+	            android:text="TextView" />
 
-        <TextView
-            android:id="@+id/recordTypeTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="TextView" />
-
-        <TextView
-            android:id="@+id/recordEntryTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="TextView" />
-
-        <TextView
-            android:id="@+id/recordInoroutTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="TextView" />
+		</LinearLayout>   
         
-        <TextView
-            android:id="@+id/recordAmountTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="TextView" />
-        
-        <TextView
-            android:id="@+id/recordUnitTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="TextView" />
-
-        <TextView
-            android:id="@+id/recordStatusTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="TextView" />
-
 </LinearLayout>
