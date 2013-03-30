@@ -3,12 +3,14 @@ package com.android.app.warehousemanagement;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import android.app.ActionBar;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
-import android.support.v4.widget.SimpleCursorAdapter;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,6 +47,9 @@ public class CurrentFragment extends ListFragment
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
+    	ActionBar actionBar = getActivity().getActionBar();
+		actionBar.setDisplayShowCustomEnabled(false);
+		
         super.onCreate(savedInstanceState);     
     }
 
@@ -180,5 +185,19 @@ public class CurrentFragment extends ListFragment
     @Override
 	public void onListItemClick(ListView listView, View view, int position, long id) {
 		super.onListItemClick(listView, view, position, id);
+		
+		HashMap<String,Object> hashMap = (HashMap<String,Object>)listView.getItemAtPosition(position);
+		Log.e("fuck",hashMap.get(InnerDBTable.Current.COLUMN_NAME_ENTRY_TYPE).toString());
+		Log.e("fuck",hashMap.get(InnerDBTable.Current.COLUMN_NAME_ENTRY_NAME).toString());
+		
+		Intent intent = new Intent(getActivity(), SingleCurrentActivity.class);
+		intent.putExtra("name", hashMap.get(InnerDBTable.Current.COLUMN_NAME_ENTRY_NAME).toString());
+		if (Integer.parseInt(hashMap.get(InnerDBTable.Current.COLUMN_NAME_ENTRY_TYPE).toString()) == R.drawable.icon_material)
+			intent.putExtra("type", "原料");
+		else
+			intent.putExtra("type", "产品");
+		intent.putExtra("amount", hashMap.get(InnerDBTable.Current.COLUMN_NAME_AMOUNT).toString());
+		intent.putExtra("unit", hashMap.get(InnerDBTable.Current.COLUMN_NAME_UNIT).toString());
+		startActivity(intent);
 	}
 }

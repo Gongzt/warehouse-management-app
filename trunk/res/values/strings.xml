@@ -3,26 +3,28 @@
 
     <string name="app_name">库存管理系统</string>
     <string name="action_settings">设置</string>
-    
     <string name="search_text">搜索</string>
-    
     <string name="sort_date">日期</string>
     <string name="sort_type">属性</string>
     <string name="sort_entry">产品</string>
     <string name="sort_amount">数量</string>
     <string name="sort_inorout">出入</string>
     <string name="sort_status">状态</string>
-    
+    <string name="sort_warehouse">仓库</string>
     <string name="date_to">至</string>
     <string name="date_start">选择初始日期</string>
     <string name="date_end">选择截止日期</string>
-    
     <string name="instock_entry">名称：</string>
     <string name="instock_entry_autocom">请输入产品名称</string>
+    <string name="instock_remark_hint">请输入产品备注信息</string>
     <string name="instock_type">属性：</string>
     <string name="instock_amount">数量：</string>
     <string name="instock_unit">单位：</string>
     <string name="instock_warehouse">仓库：</string>
     <string name="instock_remark">备注：</string>
+    <string name="actionbar_instock">入库</string>
+    <string name="actionbar_clear">清空</string>
+    <string name="title_activity_single_current">SingleCurrentActivity</string>
+    <string name="hello_world">Hello world!</string>
 
 </resources>

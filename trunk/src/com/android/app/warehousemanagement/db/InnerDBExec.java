@@ -6,6 +6,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 
 public class InnerDBExec{
@@ -43,6 +44,29 @@ public class InnerDBExec{
 
 		readableDB.close();
 		return result;
+	}
+	
+	public Cursor currentSelectByNameAndType(String name, String type){
+
+		SQLiteDatabase readableDB = dbHelper.getReadableDatabase();
+		
+		String[] projection = {
+				InnerDBTable.Current.COLUMN_NAME_AMOUNT,
+				InnerDBTable.Current.COLUMN_NAME_UNIT,
+				InnerDBTable.Current.COLUMN_NAME_WAREHOUSE
+		};
+		String selection = InnerDBTable.Current.COLUMN_NAME_ENTRY_NAME + " = ? AND "+ InnerDBTable.Current.COLUMN_NAME_ENTRY_TYPE + "= ?";
+		String[] selectionArgs = {name, type};
+		String groupBy = null;
+		String having = null;
+		String orderBy = null;
+		String limit = null;
+		
+		Cursor c = readableDB.query(InnerDBTable.Current.TABLE_NAME, projection, selection, selectionArgs, groupBy, having, orderBy, limit);
+		
+		c.moveToFirst();
+		readableDB.close();
+		return c;
 	}
 	
 	public String[] currentSelectByName(String name){
@@ -199,6 +223,42 @@ public class InnerDBExec{
 		String groupBy = null;
 		String having = null;
 		String orderBy = sortBy;
+		String limit = null;
+		
+		Cursor c = readableDB.query(InnerDBTable.Record.TABLE_NAME, projection, selection, selectionArgs, groupBy, having, orderBy, limit);
+		c.moveToFirst();
+
+		readableDB.close();
+		return c;
+	}
+	
+	public Cursor recordSelectByNameAndType (String name, String type, String sortby){
+		
+		SQLiteDatabase readableDB = dbHelper.getReadableDatabase();
+		
+		String[] projection = {
+				InnerDBTable.Record.COLUMN_NAME_RECORD_ID,
+				InnerDBTable.Record.COLUMN_NAME_WAREHOUSE,
+				InnerDBTable.Record.COLUMN_NAME_AMOUNT,
+				InnerDBTable.Record.COLUMN_NAME_UNIT,
+				InnerDBTable.Record.COLUMN_NAME_INOROUT,
+				InnerDBTable.Record.COLUMN_NAME_STATUS,
+				"SUBSTR("+InnerDBTable.Record.COLUMN_NAME_DATE+",1,4) || '-' || " +
+				"SUBSTR("+InnerDBTable.Record.COLUMN_NAME_DATE+",5,2) || '-' || " +
+				"SUBSTR("+InnerDBTable.Record.COLUMN_NAME_DATE+",7,2) || ' ' || " +
+				"SUBSTR("+InnerDBTable.Record.COLUMN_NAME_DATE+",9,2) || ':' || " +
+				"SUBSTR("+InnerDBTable.Record.COLUMN_NAME_DATE+",11,2) AS " + InnerDBTable.Record.COLUMN_NAME_DATE 
+		};
+		String selection = InnerDBTable.Record.COLUMN_NAME_ENTRY_NAME + " = ? AND " +
+				InnerDBTable.Record.COLUMN_NAME_ENTRY_TYPE + " = ? ";
+		String[] selectionArgs = {name, type};
+		String groupBy = null;
+		String having = null;
+		String orderBy;
+		if (sortby.equals(""))
+			orderBy = InnerDBTable.Record.COLUMN_NAME_DATE + " DESC";
+		else
+			orderBy = sortby + " , " + InnerDBTable.Record.COLUMN_NAME_DATE + " DESC";
 		String limit = null;
 		
 		Cursor c = readableDB.query(InnerDBTable.Record.TABLE_NAME, projection, selection, selectionArgs, groupBy, having, orderBy, limit);

@@ -29,9 +29,9 @@ public class SettingFragment extends ListFragment{
 		
 		InnerDBExec db = new InnerDBExec(getActivity());
 		Cursor c = db.recordSearch("", "", "", "");
-		items = new String[9];
+		items = new String[c.getCount()];
 		for (int i=0; i<c.getCount(); i++){
-			items[i] = c.getString(i);
+			items[i] = c.getString(1);
 			c.moveToNext();
 		}
     	ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, items);

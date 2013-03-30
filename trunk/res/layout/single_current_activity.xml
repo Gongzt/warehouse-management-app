@@ -1,0 +1,51 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    
+    <ExpandableListView
+        android:id="@+id/singleCurrentAmountExpandable"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+    </ExpandableListView>
+
+    <LinearLayout
+        android:layout_width="match_parent" 
+        android:layout_height="35dip"
+        android:layout_marginBottom="5dip"
+        android:orientation="horizontal" >
+    
+	    <Button
+		    android:id="@+id/singleCurrentDateButton"
+		    style="@style/ColumnButtonCurent"
+		    android:text="@string/sort_date"
+		    android:layout_weight= "1" />
+		<Button
+		    android:id="@+id/singleCurrentWarehouseButton"
+		    style="@style/ColumnButtonCurent"
+		    android:text="@string/sort_warehouse"
+		    android:layout_weight= "1" />
+		<Button 
+		    android:id="@+id/singleCurrentInoroutButton"
+		    style="@style/ColumnButtonCurent"
+		    android:text="@string/sort_inorout"
+		    android:layout_weight= "1"/>
+		<Button 
+		    android:id="@+id/singleCurrentAmountButton"
+		    style="@style/ColumnButtonCurent"
+		    android:text="@string/sort_amount"
+		    android:layout_weight= "1"/>
+		<Button 
+		    android:id="@+id/singleCurrentStatusButton"
+		    style="@style/ColumnButtonCurent"
+		    android:text="@string/sort_status"
+		    android:layout_weight= "1"/>
+    
+	</LinearLayout>
+    <ListView
+        android:id="@id/android:list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    
+</LinearLayout>
