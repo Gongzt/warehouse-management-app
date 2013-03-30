@@ -1,26 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+<LinearLayout 
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
+    
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dip" >
 
         <TextView
             android:id="@+id/instockEntryTextview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            style="@style/FormTextfield"
             android:text="@string/instock_entry" />
 
         <AutoCompleteTextView
             android:id="@+id/instockEntryAutocom"
-            android:layout_width="wrap_content"
+            android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:ems="10"
-            android:text="@string/instock_entry_autocom" >
+            android:lines="1"
+            android:singleLine="true"
+            android:hint="@string/instock_entry_autocom" >
 
             <requestFocus />
         </AutoCompleteTextView>
@@ -29,17 +35,17 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dip" >
 
         <TextView
             android:id="@+id/instockTypeTextview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            style="@style/FormTextfield"
             android:text="@string/instock_type" />
 
         <Spinner
             android:id="@+id/instockTypeSpinner"
-            android:layout_width="wrap_content"
+            android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_weight="1" />
 
@@ -47,50 +53,53 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dip" >
 
         <TextView
             android:id="@+id/instockAmountTextview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            style="@style/FormTextfield"
             android:text="@string/instock_amount" />
 
         <EditText
             android:id="@+id/instockAmountEdittext"
-            android:layout_width="wrap_content"
+            android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:ems="10"
+            android:lines="1"
+            android:singleLine="true"
             android:inputType="number" />
 
         <TextView
             android:id="@+id/instockUnitTextview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            style="@style/FormTextfield"
             android:text="@string/instock_unit" />
 
         <EditText
             android:id="@+id/instockUnitEdittext"
-            android:layout_width="wrap_content"
+            android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:lines="1"
+            android:singleLine="true"
             android:ems="10" />
 
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dip" >
 
         <TextView
             android:id="@+id/instockWarehouseTextview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            style="@style/FormTextfield"
             android:text="@string/instock_warehouse" />
 
         <Spinner
             android:id="@+id/instockWarehouseSpinner"
-            android:layout_width="wrap_content"
+            android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_weight="1" />
 
@@ -98,12 +107,12 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dip" >
 
         <TextView
             android:id="@+id/instockRemarkTextview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            style="@style/FormTextfield"
             android:text="@string/instock_remark" />
 
     </LinearLayout>
@@ -112,6 +121,8 @@
         android:id="@+id/instockRemarkEdittext"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:ems="10" />
-
+        android:ems="10"
+        android:hint="@string/instock_remark_hint" />
+	
 </LinearLayout>
+</ScrollView>

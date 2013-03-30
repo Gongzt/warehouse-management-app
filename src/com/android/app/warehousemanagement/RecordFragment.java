@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 
+import android.app.ActionBar;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -123,29 +124,6 @@ public class RecordFragment extends ListFragment
 			}
 			
 			updateCursor(list, c);
-//			list.clear();
-//	  		
-//	  		c.moveToFirst();
-//	  		for(int i=0;i<c.getCount();i++)     
-//	  		{     
-//	  			HashMap<String, Object> map = new HashMap<String, Object>();
-//	  			map.put(InnerDBTable.Record.COLUMN_NAME_RECORD_ID, c.getString(0));
-//	  			map.put(InnerDBTable.Record.COLUMN_NAME_ENTRY_NAME, c.getString(1));  
-//	  			if (c.getString(2).equals("²úÆ·")){
-//	  				map.put(InnerDBTable.Record.COLUMN_NAME_ENTRY_TYPE, R.drawable.icon_product); 
-//	  			}
-//	  			else {
-//	  				map.put(InnerDBTable.Record.COLUMN_NAME_ENTRY_TYPE, R.drawable.icon_material); 
-//	  			}
-//	  			map.put(InnerDBTable.Record.COLUMN_NAME_AMOUNT, c.getString(4));
-//	  			map.put(InnerDBTable.Record.COLUMN_NAME_UNIT, c.getString(5));
-//	  			map.put(InnerDBTable.Record.COLUMN_NAME_INOROUT, c.getString(6));
-//	  			map.put(InnerDBTable.Record.COLUMN_NAME_STATUS, c.getString(7));
-//	  			map.put(InnerDBTable.Record.COLUMN_NAME_DATE, c.getString(9));
-//	  			
-//	  			list.add(map);    
-//	  			c.moveToNext();
-//	  		}
 			
 			mAdapter.notifyDataSetChanged();
 		}
@@ -154,6 +132,9 @@ public class RecordFragment extends ListFragment
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
+    	ActionBar actionBar = getActivity().getActionBar();
+		actionBar.setDisplayShowCustomEnabled(false);
+    	
     	super.onCreate(savedInstanceState);
     }
 
@@ -238,6 +219,16 @@ public class RecordFragment extends ListFragment
         
         inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         
+    }
+    
+    @Override
+    public void onResume(){
+    	super.onResume();
+    	
+    	Log.e("fuck","update");
+    	updateCursor(list, db.recordSearch(keyword, sortBy, getButtonDate(R.id.recordDateStartButton), getButtonDate(R.id.recordDateEndButton)));
+    	mAdapter.notifyDataSetChanged();
+    	Log.e("fuck","update complete");
     }
     
     @Override

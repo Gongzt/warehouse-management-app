@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="5dip"
+    android:paddingTop="5dip"
+    android:orientation="horizontal" >
+	
+    	<LinearLayout
+    	    style="@style/ColumnEntryCurrent"
+            android:layout_weight="6"
+            android:gravity="center"
+            android:orientation="vertical">
+    		<TextView
+	            android:id="@+id/singleCurrentListingDateText"
+	            style="@style/ColumnEntryCurrent"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:textSize="14sp"
+	            android:gravity="center|right"
+	            android:text="TextView" />
+	    	
+	    	<TextView
+	            android:id="@+id/singleCurrentListingWarehouseText"
+	            style="@style/ColumnEntryCurrent"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:textSize="14sp"
+	            android:gravity="right"
+	            android:text="TextView" />    
+    	</LinearLayout>
+    	
+		<ImageView      
+		    style="@style/ColumnEntryCurrent"
+            android:layout_weight="3"
+            android:gravity="right" 
+            android:layout_gravity="center"  
+            android:layout_marginLeft="15dip"  
+			android:id="@+id/singleCurrentListingInoroutImage"
+			android:contentDescription="@string/sort_type">      
+		</ImageView>   
+		
+        <TextView
+            android:id="@+id/singleCurrentListingAmountText"
+            style="@style/ColumnEntryCurrent"
+            android:layout_weight="2"
+            android:gravity="center|right"
+            android:layout_gravity="center"
+            android:text="TextView" />
+        
+        <TextView
+            android:id="@+id/singleCurrentListingUnitText"
+            style="@style/ColumnEntryCurrent"
+            android:layout_weight="1"
+            android:gravity="center|left"
+            android:layout_gravity="center"
+            android:text="TextView" />	
+
+        <ImageView      
+		    style="@style/ColumnEntryCurrent"
+            android:layout_weight="3"
+            android:gravity="center"   
+            android:layout_gravity="center"  
+			android:id="@+id/singleCurrentListingStatusImage"
+			android:contentDescription="@string/sort_type">      
+		</ImageView>
+        
+</LinearLayout>
