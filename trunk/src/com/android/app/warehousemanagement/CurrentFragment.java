@@ -187,8 +187,6 @@ public class CurrentFragment extends ListFragment
 		super.onListItemClick(listView, view, position, id);
 		
 		HashMap<String,Object> hashMap = (HashMap<String,Object>)listView.getItemAtPosition(position);
-		Log.e("fuck",hashMap.get(InnerDBTable.Current.COLUMN_NAME_ENTRY_TYPE).toString());
-		Log.e("fuck",hashMap.get(InnerDBTable.Current.COLUMN_NAME_ENTRY_NAME).toString());
 		
 		Intent intent = new Intent(getActivity(), SingleCurrentActivity.class);
 		intent.putExtra("name", hashMap.get(InnerDBTable.Current.COLUMN_NAME_ENTRY_NAME).toString());

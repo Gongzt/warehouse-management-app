@@ -12,6 +12,7 @@ import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -23,6 +24,7 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
@@ -313,6 +315,19 @@ public class SingleCurrentActivity extends ListActivity
     	updateCursor(db.recordSelectByNameAndType(name, type, sortBy));
     	mAdapter.notifyDataSetChanged();
 		
+	}
+	
+	@Override
+	public void onListItemClick(ListView listView, View view, int position, long id) {
+		super.onListItemClick(listView, view, position, id);
+		
+		HashMap<String,Object> hashMap = (HashMap<String,Object>)listView.getItemAtPosition(position);
+		
+		Intent intent = new Intent(this, SingleRecordActivity.class);
+		intent.putExtra("id", (String)hashMap.get(InnerDBTable.Record.COLUMN_NAME_RECORD_ID));		
+		//intent.putExtra("type", type);
+		//intent.putExtra("unit", unit);
+		startActivity(intent);
 	}
 
 }
