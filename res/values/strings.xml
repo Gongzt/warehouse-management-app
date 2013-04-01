@@ -26,5 +26,6 @@
     <string name="actionbar_clear">清空</string>
     <string name="title_activity_single_current">SingleCurrentActivity</string>
     <string name="hello_world">Hello world!</string>
+    <string name="title_activity_single_record">SingleRecordActivity</string>
 
 </resources>
