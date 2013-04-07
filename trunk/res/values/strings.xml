@@ -21,11 +21,21 @@
     <string name="instock_amount">数量：</string>
     <string name="instock_unit">单位：</string>
     <string name="instock_warehouse">仓库：</string>
+    <string name="instock_record">登记：</string>
+    <string name="instock_inorout">出入：</string>
     <string name="instock_remark">备注：</string>
     <string name="actionbar_instock">入库</string>
     <string name="actionbar_clear">清空</string>
-    <string name="title_activity_single_current">SingleCurrentActivity</string>
-    <string name="hello_world">Hello world!</string>
-    <string name="title_activity_single_record">SingleRecordActivity</string>
+    <string name="inorout_usable_amount">可用出库数量：</string>
+    <string name="product">产品</string>
+    <string name="material">原料</string>
+    <string name="pending">待审</string>
+    <string name="passed">通过</string>
+    <string name="instock">入库</string>
+    <string name="outstock">出库</string>
+    <string name="title_activity_single_current">single current activity</string>
+    <string name="title_activity_single_record">single record activity</string>
+    <string name="title_activity_inorout">inorout activity</string>
+    <string name="text_default">text view</string>
 
 </resources>

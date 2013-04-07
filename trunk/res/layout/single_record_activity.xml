@@ -1,17 +1,98 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+<LinearLayout 
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context=".SingleRecordActivity" >
+    android:layout_height="wrap_content"
+    android:orientation="vertical" >
+
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dip" >
+		
+        <TextView
+            style="@style/FormTextfield"
+            android:text="@string/instock_entry" />
+        
+        <ImageView
+            android:id="@+id/singleRecordTypeImage"
+            style="@style/FormTextfield"
+            android:contentDescription="@string/text_default" />
+        
+        <TextView
+            android:id="@+id/singleRecordEntryTextView"
+            style="@style/FormTextfield"
+            android:text="@string/text_default" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dip" >
+
+        <TextView
+            style="@style/FormTextfield"
+            android:text="@string/instock_record" />
+        
+        <ImageView
+            android:id="@+id/singleRecordStatusImage"
+            style="@style/FormTextfield"
+            android:contentDescription="@string/text_default" />
+        
+        <TextView
+            android:id="@+id/singleRecordDateTextView"
+            style="@style/FormTextfield"
+            android:text="@string/text_default" />
+
+    </LinearLayout>
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dip" >
+
+        <TextView
+            style="@style/FormTextfield"
+            android:text="@string/instock_inorout" />
+        
+        <ImageView
+            android:id="@+id/singleRecordInoroutImage"
+            style="@style/FormTextfield"
+            android:contentDescription="@string/text_default" />
+        
+        <TextView
+            android:id="@+id/singleRecordWarehouseTextView"
+            style="@style/FormTextfield"
+            android:text="@string/text_default" />
+
+        <TextView
+            android:id="@+id/singleRecordAmountTextView"
+            style="@style/FormTextfield"
+            android:text="@string/text_default" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dip" >
+
+        <TextView
+            style="@style/FormTextfield"
+            android:text="@string/instock_remark" />
+
+    </LinearLayout>
 
     <TextView
-        android:id="@+id/haha"
-        android:layout_width="wrap_content"
+        android:id="@+id/singleRecordRemarkTextView"
+        style="@style/FormTextfield"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/hello_world" />
-
-</RelativeLayout>
+        android:text="@string/text_default"/>
+	
+</LinearLayout>
+</ScrollView>

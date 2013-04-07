@@ -12,22 +12,22 @@
             android:gravity="center"
             android:orientation="vertical">
     		<TextView
-	            android:id="@+id/singleCurrentListingDateText"
+	            android:id="@+id/singleCurrentListingDateTextView"
 	            style="@style/ColumnEntryCurrent"
 	            android:layout_width="wrap_content"
 	            android:layout_height="wrap_content"
 	            android:textSize="14sp"
 	            android:gravity="center|right"
-	            android:text="TextView" />
+	            android:text="@string/text_default"/>
 	    	
 	    	<TextView
-	            android:id="@+id/singleCurrentListingWarehouseText"
+	            android:id="@+id/singleCurrentListingWarehouseTextView"
 	            style="@style/ColumnEntryCurrent"
 	            android:layout_width="wrap_content"
 	            android:layout_height="wrap_content"
 	            android:textSize="14sp"
 	            android:gravity="right"
-	            android:text="TextView" />    
+	            android:text="@string/text_default" />    
     	</LinearLayout>
     	
 		<ImageView      
@@ -41,27 +41,27 @@
 		</ImageView>   
 		
         <TextView
-            android:id="@+id/singleCurrentListingAmountText"
+            android:id="@+id/singleCurrentListingAmountTextView"
             style="@style/ColumnEntryCurrent"
             android:layout_weight="2"
             android:gravity="center|right"
             android:layout_gravity="center"
-            android:text="TextView" />
+            android:text="@string/text_default" />
         
         <TextView
-            android:id="@+id/singleCurrentListingUnitText"
+            android:id="@+id/singleCurrentListingUnitTextView"
             style="@style/ColumnEntryCurrent"
             android:layout_weight="1"
             android:gravity="center|left"
             android:layout_gravity="center"
-            android:text="TextView" />	
+            android:text="@string/text_default" />	
 
         <ImageView      
+		    android:id="@+id/singleCurrentListingStatusImage"
 		    style="@style/ColumnEntryCurrent"
             android:layout_weight="3"
             android:gravity="center"   
             android:layout_gravity="center"  
-			android:id="@+id/singleCurrentListingStatusImage"
 			android:contentDescription="@string/sort_type">      
 		</ImageView>
         
