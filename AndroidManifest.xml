@@ -31,6 +31,18 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.android.app.warehousemanagement.WarehouseManagementMain" />
         </activity>
+        <activity
+            android:name="com.android.app.warehousemanagement.SingleRecordActivity"
+            android:label="@string/title_activity_single_record"
+            android:parentActivityName="com.android.app.warehousemanagement.WarehouseManagementMain" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.android.app.warehousemanagement.WarehouseManagementMain" />
+        </activity>
+        <activity
+            android:name="com.android.app.warehousemanagement.InoroutActivity"
+            android:label="@string/title_activity_inorout" >
+        </activity>
     </application>
 
 </manifest>

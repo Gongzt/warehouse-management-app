@@ -4,22 +4,25 @@
     android:layout_height="match_parent" >
     
     <TextView
-	        android:id="@+id/actionbarTitle"
+	        android:id="@+id/singleRecordTitle"
 	        android:layout_height="wrap_content"
 			android:layout_width="wrap_content"  
 			android:layout_centerVertical="true"  
-	        android:text="@string/app_name"
-	        android:textSize="18sp"
-	        android:textColor="#ffffff" />    
+	        android:textSize="14sp"
+	        android:textColor="#ffffff"
+	        android:layout_alignParentLeft="true" 
+	        android:text="@string/text_default" />    
     	
+
+    
     <ImageButton
-            android:id="@+id/actionbarSaveButton"
+            android:id="@+id/singleRecordPassButton"
             android:layout_height="fill_parent"
             android:layout_width="wrap_content"
             android:layout_alignParentRight="true"
             android:paddingLeft="10dip"
             android:paddingRight="10dip"
-            android:src="@drawable/icon_instock_save"
+            android:src="@drawable/icon_accept"
             android:background="@drawable/actionbar_button"
             android:contentDescription="@string/text_default"/>
     
@@ -30,18 +33,18 @@
 			android:layout_centerVertical="true"
 			android:layout_marginLeft="5dip"
 			android:layout_marginRight="5dip" 
-            android:layout_toLeftOf="@id/actionbarSaveButton"
+            android:layout_toLeftOf="@id/singleRecordPassButton"
             android:background="@drawable/divider"
             android:contentDescription="@string/text_default" />    
     
     <ImageButton
-            android:id="@+id/actionbarCleanButton"
+            android:id="@+id/singleRecordDeleteButton"
             android:layout_height="fill_parent"
             android:layout_width="wrap_content"
             android:paddingLeft="10dip"
             android:paddingRight="10dip"
             android:layout_toLeftOf="@id/actionbarDivider"
-            android:src="@drawable/icon_clean"
+            android:src="@drawable/icon_cancel"
             android:background="@drawable/actionbar_button"
             android:contentDescription="@string/text_default" />     
 </RelativeLayout>

@@ -5,7 +5,6 @@
     android:orientation="vertical" >
    
     <LinearLayout
-        android:id="@+id/currentSearchLayout"
         android:layout_width="match_parent" 
         android:layout_height="wrap_content"
         android:orientation="horizontal" >
@@ -38,7 +37,7 @@
 		    android:text="@string/sort_entry"
 		    android:layout_weight= "5" />
 		<Button 
-		    android:id="@+id/currentAmountTextview"
+		    android:id="@+id/currentAmountButton"
 		    style="@style/ColumnButtonCurent"
 		    android:text="@string/sort_amount"
 		    android:layout_weight= "3"/>

@@ -7,10 +7,10 @@
     android:orientation="horizontal" >
 
 		<ImageView      
+		    android:id="@+id/currentTypeImage"
 		    style="@style/ColumnEntryCurrent"
             android:layout_weight="3"
             android:gravity="center"     
-			android:id="@+id/currentTypeImage"
 			android:contentDescription="@string/sort_type">      
 		</ImageView>   
     
@@ -19,20 +19,20 @@
             style="@style/ColumnEntryCurrent"
             android:layout_weight="5"
             android:gravity="center|right"
-            android:text="TextView" />
+            android:text="@string/text_default" />
         
         <TextView
             android:id="@+id/currentAmountTextView"
             style="@style/ColumnEntryCurrent"
             android:layout_weight="2"
             android:gravity="center|right"
-            android:text="TextView" />
+            android:text="@string/text_default" />
         
         <TextView
             android:id="@+id/currentUnitTextView"
             style="@style/ColumnEntryCurrent"
             android:layout_weight="1"
             android:gravity="center|left"
-            android:text="TextView" />	
+            android:text="@string/text_default" />	
 
 </LinearLayout>
