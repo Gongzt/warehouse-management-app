@@ -6,7 +6,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
 
 
 public class InnerDBExec{
@@ -43,6 +42,33 @@ public class InnerDBExec{
 		}
 
 		readableDB.close();
+		return result;
+	}
+	
+	public String[] currentSelectTotal(String name, String type){
+
+		SQLiteDatabase readableDB = dbHelper.getReadableDatabase();
+		
+		String[] projection = {
+				"SUM(" + InnerDBTable.Current.COLUMN_NAME_AMOUNT + ") AS " + InnerDBTable.Current.COLUMN_NAME_AMOUNT, 
+				InnerDBTable.Current.COLUMN_NAME_UNIT
+		};
+		String selection = InnerDBTable.Current.COLUMN_NAME_ENTRY_NAME + " = ? AND "+ InnerDBTable.Current.COLUMN_NAME_ENTRY_TYPE + "= ?";
+		String[] selectionArgs = {name, type};
+		String groupBy = null;
+		String having = null;
+		String orderBy = InnerDBTable.Current.COLUMN_NAME_ENTRY_NAME + " , " + InnerDBTable.Current.COLUMN_NAME_ENTRY_TYPE;
+		String limit = null;
+		
+		Cursor c = readableDB.query(InnerDBTable.Current.TABLE_NAME, projection, selection, selectionArgs, groupBy, having, orderBy, limit);
+		
+		c.moveToFirst();
+		String[] result = new String[2];
+		result[0] = c.getString(0);
+		result[1] = c.getString(1);
+		
+		readableDB.close();
+		
 		return result;
 	}
 	
@@ -98,9 +124,8 @@ public class InnerDBExec{
 	//search the product(material) relative to the keyword
 	//return order: entryid, entryname, type, amount
 	public Cursor currentSearch(String keyword, String sortBy){
-		
 		SQLiteDatabase readableDB = dbHelper.getReadableDatabase();
-		
+
 		String[] projection = {
 				InnerDBTable.Current.COLUMN_NAME_ENTRY_ID,
 				InnerDBTable.Current.COLUMN_NAME_ENTRY_NAME,
@@ -184,14 +209,15 @@ public class InnerDBExec{
 	//search the record relative to the keyword
 	//return order: recordid, entryname, type, warehouse, amount, inorout, status, remark, date
 	public Cursor recordSearch(String keyword, String sortBy, String startDate, String endDate){
-		
 		if (startDate.equals("")){
 			startDate = "190001010000";
 		}
 		if (endDate.equals("")){
 			Calendar c = Calendar.getInstance();
-			endDate = parseDate(c);
+			endDate = parseDate(c).substring(0,6);
 		}
+		endDate += "2359";
+		
 		
 		SQLiteDatabase readableDB = dbHelper.getReadableDatabase();
 		
@@ -222,7 +248,11 @@ public class InnerDBExec{
 		String[] selectionArgs = {"%"+keyword+"%", "%"+keyword+"%", "%"+keyword+"%", "%"+keyword+"%", "%"+keyword+"%", "%"+keyword+"%", startDate, endDate};
 		String groupBy = null;
 		String having = null;
-		String orderBy = sortBy;
+		String orderBy = null;
+		if (sortBy.equals(""))
+			orderBy = InnerDBTable.Record.COLUMN_NAME_DATE + " DESC";
+		else
+			orderBy = sortBy + " , " + InnerDBTable.Record.COLUMN_NAME_DATE + " DESC";
 		String limit = null;
 		
 		Cursor c = readableDB.query(InnerDBTable.Record.TABLE_NAME, projection, selection, selectionArgs, groupBy, having, orderBy, limit);
@@ -323,7 +353,7 @@ public class InnerDBExec{
 
 	//update the record status and date
 	public void recordUpdate(String id){
-
+		
 		SQLiteDatabase writableDB = dbHelper.getWritableDatabase();
 		
 		String selection = InnerDBTable.Record.COLUMN_NAME_RECORD_ID + " = ?";
@@ -335,6 +365,7 @@ public class InnerDBExec{
 		values.put(InnerDBTable.Record.COLUMN_NAME_DATE, parseDate(calendar));
 		
 		writableDB.update(InnerDBTable.Record.TABLE_NAME, values, selection, selectionArgs);
+		
 		
 		writableDB.close();
 	}
@@ -350,6 +381,66 @@ public class InnerDBExec{
 		writableDB.delete(InnerDBTable.Record.TABLE_NAME, selection, selectionArgs);
 		
 		writableDB.close();
+	}
+	
+	public int entrySelectUsableAmount(String name, String type, String warehouse){
+
+		SQLiteDatabase readableDB = dbHelper.getReadableDatabase();
+		
+		String[] projection = {
+				InnerDBTable.Current.COLUMN_NAME_AMOUNT, 
+		};
+		String selection = 
+				InnerDBTable.Current.COLUMN_NAME_ENTRY_NAME + " = ? AND " +
+				InnerDBTable.Current.COLUMN_NAME_ENTRY_TYPE + " = ? AND " +
+				InnerDBTable.Current.COLUMN_NAME_WAREHOUSE + " = ?";
+		String[] selectionArgs = {name, type, warehouse};
+		String groupBy = InnerDBTable.Current.COLUMN_NAME_ENTRY_NAME + " , " + InnerDBTable.Current.COLUMN_NAME_ENTRY_TYPE;
+		String having = null;
+		String orderBy = null;
+		String limit = null;
+
+		Cursor c = readableDB.query(InnerDBTable.Current.TABLE_NAME, projection, selection, selectionArgs, groupBy, having, orderBy, limit);
+		c.moveToFirst();
+
+		int total;
+		if (c.getCount() == 0)
+			return 0;
+		else
+			total = Integer.parseInt(c.getString(0));
+		
+		projection = new String[] {
+				"SUM(" + InnerDBTable.Record.COLUMN_NAME_AMOUNT + ") AS " + InnerDBTable.Record.COLUMN_NAME_AMOUNT 
+		};
+		selection = 
+				InnerDBTable.Record.COLUMN_NAME_ENTRY_NAME + " = ? AND " +
+				InnerDBTable.Record.COLUMN_NAME_ENTRY_TYPE + " = ? AND " +
+				InnerDBTable.Record.COLUMN_NAME_WAREHOUSE + " = ? AND " +
+				InnerDBTable.Record.COLUMN_NAME_STATUS + " = ? AND " + 
+				InnerDBTable.Record.COLUMN_NAME_INOROUT + " = ?";
+		selectionArgs = new String[] {name, type, warehouse, "´ýÉó", "³ö¿â"};
+		groupBy = 
+				InnerDBTable.Record.COLUMN_NAME_ENTRY_NAME + ", " +
+				InnerDBTable.Record.COLUMN_NAME_ENTRY_TYPE + ", " +
+				InnerDBTable.Record.COLUMN_NAME_WAREHOUSE + ", " +
+				InnerDBTable.Record.COLUMN_NAME_STATUS;
+		having = null;
+		orderBy = null;
+		limit = null;
+		
+		c = readableDB.query(InnerDBTable.Record.TABLE_NAME, projection, selection, selectionArgs, groupBy, having, orderBy, limit);
+		c.moveToFirst();
+		
+		int used;
+		if (c.getCount() == 0)
+			used = 0;
+		else
+			used = Integer.parseInt(c.getString(0));
+		
+		readableDB.close();
+		
+		return total - used;
+		
 	}
 	
 	public String[] warehouseSelectAll(){
@@ -380,7 +471,7 @@ public class InnerDBExec{
 	
 	private String parseDate(Calendar calendar){
 		int year = calendar.get(Calendar.YEAR);
-		int month = calendar.get(Calendar.MONTH);
+		int month = calendar.get(Calendar.MONTH)+1;
 		int day = calendar.get(Calendar.DAY_OF_MONTH);
 		int hour = calendar.get(Calendar.HOUR_OF_DAY);
 		int minute = calendar.get(Calendar.MINUTE);

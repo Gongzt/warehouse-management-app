@@ -8,13 +8,12 @@ import android.app.ActionBar;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.ListFragment;
-import android.support.v4.widget.SimpleCursorAdapter;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,6 +21,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.DatePicker;
+import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.SimpleAdapter;
 
@@ -31,10 +31,13 @@ import com.android.app.warehousemanagement.db.InnerDBTable;
 public class RecordFragment extends ListFragment 
 							implements View.OnClickListener, SearchView.OnQueryTextListener{
 	
+	
 	private InnerDBExec db = null;
 	private SimpleAdapter mAdapter = null;
-	private String sortBy = InnerDBTable.Record.COLUMN_NAME_DATE + " DESC";
+	private String sortBy = "";
 	private String keyword = "";
+	private String startDate = "";
+	private String endDate = "";
 	private InputMethodManager inputManager = null;
 	private ArrayList<HashMap<String, Object>> list = new ArrayList<HashMap<String, Object>>();
 	private String[] fromColumns = new String[] {
@@ -82,7 +85,7 @@ public class RecordFragment extends ListFragment
 			bundle.putString("date", date);
 	        dialog.setArguments(bundle);
 			return dialog;
-		    }
+		}
 		
 		@Override
 		public Dialog onCreateDialog(Bundle savedInstanceState){
@@ -115,12 +118,12 @@ public class RecordFragment extends ListFragment
 			if (getTag().equals(R.id.recordDateStartButton+"")){
 				Button dateStartButton = (Button)getActivity().findViewById(R.id.recordDateStartButton);
 				dateStartButton.setText(strYear+"-"+strMonth+"-"+strDay);
-				c = db.recordSearch(keyword, sortBy, strYear+strMonth+strDay+"0000", date);
+				c = db.recordSearch(keyword, sortBy, strYear+strMonth+strDay, date);
 			}
 			else{
 				Button dateEndButton = (Button)getActivity().findViewById(R.id.recordDateEndButton);
 				dateEndButton.setText(strYear+"-"+strMonth+"-"+strDay);
-				c = db.recordSearch(keyword, sortBy, date, strYear+strMonth+strDay+"0000");
+				c = db.recordSearch(keyword, sortBy, date, strYear+strMonth+strDay);
 			}
 			
 			updateCursor(list, c);
@@ -134,16 +137,16 @@ public class RecordFragment extends ListFragment
     public void onCreate(Bundle savedInstanceState) {
     	ActionBar actionBar = getActivity().getActionBar();
 		actionBar.setDisplayShowCustomEnabled(false);
-    	
+
     	super.onCreate(savedInstanceState);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
         Bundle savedInstanceState) {
-
+    	//Stage1: set up database and adapter
         db = new InnerDBExec(getActivity());
-        updateCursor(list, db.recordSearch("", sortBy, "", ""));
+        
         mAdapter= new SimpleAdapter(getActivity(),
         		list,
         		R.layout.record_list_item,
@@ -153,6 +156,87 @@ public class RecordFragment extends ListFragment
         setListAdapter(mAdapter);
         
         return inflater.inflate(R.layout.record_fragment, container, false);
+    }
+    
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState){
+    	//Stage2: check if there are some saved instances, if so, recover the view status using those instances
+    	super.onViewCreated(view, savedInstanceState);
+        
+        if (!startDate.equals(""))
+    		((Button)getView().findViewById(R.id.recordDateStartButton)).setText(startDate);
+    	if (!endDate.equals(""))
+    		((Button)getView().findViewById(R.id.recordDateEndButton)).setText(endDate);
+        if (!sortBy.equals("")){
+        	Button currentButton = null;
+        	String[] sortDetail = sortBy.split(" ");
+        	if (sortDetail[0].equals(InnerDBTable.Record.COLUMN_NAME_DATE))
+        		currentButton = (Button)getView().findViewById(R.id.recordDateButton);
+        	else if (sortDetail[0].equals(InnerDBTable.Record.COLUMN_NAME_INOROUT))
+            	currentButton = (Button)getView().findViewById(R.id.recordInoroutButton);
+        	else if (sortDetail[0].equals(InnerDBTable.Record.COLUMN_NAME_ENTRY_TYPE))
+            	currentButton = (Button)getView().findViewById(R.id.recordTypeButton);
+        	else if (sortDetail[0].equals(InnerDBTable.Record.COLUMN_NAME_STATUS))
+            	currentButton = (Button)getView().findViewById(R.id.recordStatusButton);
+        	else if (sortDetail[0].equals(InnerDBTable.Record.COLUMN_NAME_ENTRY_NAME))
+            	currentButton = (Button)getView().findViewById(R.id.recordEntryButton);
+        	
+        	if (sortDetail.length == 2){
+        		currentButton.setBackgroundResource(R.drawable.column_button_green);
+	    		currentButton.setGravity(Gravity.CENTER_VERTICAL|Gravity.LEFT);
+	    		currentButton.setPadding(3, 0, 0, 0);
+	    		currentButton.setTextColor(Color.rgb(102, 153, 0));
+        	}
+        	else {
+        		currentButton.setBackgroundResource(R.drawable.column_button_orange);
+    			currentButton.setGravity(Gravity.CENTER_VERTICAL|Gravity.LEFT);
+    			currentButton.setTextColor(Color.rgb(255, 136, 0));
+    			currentButton.setPadding(3, 0, 0, 0);
+        	}
+        }
+        
+    }
+    
+    
+    @Override
+    public void onResume(){
+    	//Stage3: bind listener with the views
+    	super.onResume();
+    	
+    	SearchView searchView = (SearchView) getView().findViewById(R.id.recordSearchBar);
+        searchView.setOnQueryTextListener(this);
+        
+        Button recordDateButton = (Button)getView().findViewById(R.id.recordDateButton);
+        recordDateButton.setOnClickListener(this);
+        Button recordTypeButton = (Button)getView().findViewById(R.id.recordTypeButton);
+        recordTypeButton.setOnClickListener(this);
+        Button recordEntryButton = (Button)getView().findViewById(R.id.recordEntryButton);
+        recordEntryButton.setOnClickListener(this);
+        Button recordInoroutButton = (Button)getView().findViewById(R.id.recordInoroutButton);
+        recordInoroutButton.setOnClickListener(this);
+        Button recordStatusButton = (Button)getView().findViewById(R.id.recordStatusButton);
+        recordStatusButton.setOnClickListener(this);
+        
+        Button recordDateStartButton = (Button)getView().findViewById(R.id.recordDateStartButton);
+        recordDateStartButton.setOnClickListener(this);
+        Button recordDateEndButton = (Button)getView().findViewById(R.id.recordDateEndButton);
+        recordDateEndButton.setOnClickListener(this);
+        
+        inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+    	
+    	updateCursor(list, db.recordSearch(keyword, sortBy, getButtonDate(R.id.recordDateStartButton), getButtonDate(R.id.recordDateEndButton)));
+    	mAdapter.notifyDataSetChanged();
+    }
+    
+    
+    @Override
+    public void onStop() {
+    	//Stage stop: save instances
+    	super.onStop();
+    	
+    	((SearchView)getView().findViewById(R.id.recordSearchBar)).setOnQueryTextListener(null);
+    	startDate = ((Button)getView().findViewById(R.id.recordDateStartButton)).getText().toString();
+    	endDate = ((Button)getView().findViewById(R.id.recordDateEndButton)).getText().toString();
     }
     
     public final static void updateCursor(ArrayList<HashMap<String, Object>> list, Cursor c){
@@ -192,44 +276,6 @@ public class RecordFragment extends ListFragment
   		
   	}
     
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState){
-    	
-    	super.onViewCreated(view, savedInstanceState);
-    	
-    	SearchView searchView = (SearchView) getView().findViewById(R.id.recordSearchBar);
-        searchView.setOnQueryTextListener(this);
-        searchView.setSelected(true);
-        
-        Button recordDateButton = (Button)getView().findViewById(R.id.recordDateButton);
-        recordDateButton.setOnClickListener(this);
-        Button recordTypeButton = (Button)getView().findViewById(R.id.recordTypeButton);
-        recordTypeButton.setOnClickListener(this);
-        Button recordEntryButton = (Button)getView().findViewById(R.id.recordEntryButton);
-        recordEntryButton.setOnClickListener(this);
-        Button recordInoroutButton = (Button)getView().findViewById(R.id.recordInoroutButton);
-        recordInoroutButton.setOnClickListener(this);
-        Button recordStatusButton = (Button)getView().findViewById(R.id.recordStatusButton);
-        recordStatusButton.setOnClickListener(this);
-        
-        Button recordDateStartButton = (Button)getView().findViewById(R.id.recordDateStartButton);
-        recordDateStartButton.setOnClickListener(this);
-        Button recordDateEndButton = (Button)getView().findViewById(R.id.recordDateEndButton);
-        recordDateEndButton.setOnClickListener(this);
-        
-        inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-        
-    }
-    
-    @Override
-    public void onResume(){
-    	super.onResume();
-    	
-    	Log.e("fuck","update");
-    	updateCursor(list, db.recordSearch(keyword, sortBy, getButtonDate(R.id.recordDateStartButton), getButtonDate(R.id.recordDateEndButton)));
-    	mAdapter.notifyDataSetChanged();
-    	Log.e("fuck","update complete");
-    }
     
     @Override
     public void onClick(View v){
@@ -318,18 +364,18 @@ public class RecordFragment extends ListFragment
 	    	}
 	    			
 	    	if (sortDetail[0].equals(sortColumn) ){
-	    		if (sortDetail[1].equals("DESC")){
-	    			sortBy = sortColumn + " , " + InnerDBTable.Record.COLUMN_NAME_DATE + " DESC";
+	    		if (sortDetail.length ==2){
+	    			sortBy = sortColumn;
 	    			currentButton.setBackgroundResource(R.drawable.column_button_orange);
 	    			currentButton.setGravity(Gravity.CENTER_VERTICAL|Gravity.LEFT);
 	    			currentButton.setTextColor(Color.rgb(255, 136, 0));
 	    			currentButton.setPadding(3, 0, 0, 0);
 	    		}
 	    	else 
-	    			sortBy = InnerDBTable.Record.COLUMN_NAME_DATE + " DESC";
+	    			sortBy = "";
 	    	}
 	    	else {
-	    		sortBy = sortColumn + " DESC" + " , " + InnerDBTable.Record.COLUMN_NAME_DATE + " DESC";
+	    		sortBy = sortColumn + " DESC";
 	    		currentButton.setBackgroundResource(R.drawable.column_button_green);
 	    		currentButton.setGravity(Gravity.CENTER_VERTICAL|Gravity.LEFT);
 	    		currentButton.setPadding(3, 0, 0, 0);
@@ -353,24 +399,31 @@ public class RecordFragment extends ListFragment
     
 	@Override
 	public boolean onQueryTextChange(String str) {
-    	
-    	keyword = str;
-    	updateCursor(list, db.recordSearch(keyword, sortBy, getButtonDate(R.id.recordDateStartButton), getButtonDate(R.id.recordDateEndButton)));
+		keyword = str;
+		updateCursor(list, db.recordSearch(keyword, sortBy, getButtonDate(R.id.recordDateStartButton), getButtonDate(R.id.recordDateEndButton)));
     	mAdapter.notifyDataSetChanged();
-		
+    	
 		return false;
 	}
 	
 	@Override
 	public boolean onQueryTextSubmit(String str) {
-    	
-    	keyword = str;
-    	updateCursor(list, db.recordSearch(keyword, sortBy, getButtonDate(R.id.recordDateStartButton), getButtonDate(R.id.recordDateEndButton)));
-    	mAdapter.notifyDataSetChanged();
 		inputManager.hideSoftInputFromWindow(
                 getActivity().getCurrentFocus().getWindowToken(),
                 InputMethodManager.HIDE_NOT_ALWAYS); 
 		
 		return false;
+	}
+	
+    @SuppressWarnings("unchecked")
+	@Override
+	public void onListItemClick(ListView listView, View view, int position, long id) {
+		super.onListItemClick(listView, view, position, id);
+		
+		HashMap<String,Object> hashMap = (HashMap<String,Object>)listView.getItemAtPosition(position);
+		
+		Intent intent = new Intent(getActivity(), SingleRecordActivity.class);
+		intent.putExtra("id", (String)hashMap.get(InnerDBTable.Record.COLUMN_NAME_RECORD_ID));
+		startActivity(intent);
 	}
 }

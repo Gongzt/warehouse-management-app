@@ -11,18 +11,16 @@ import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.NavUtils;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.Button;
 import android.widget.ExpandableListView;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
@@ -37,13 +35,13 @@ public class SingleCurrentActivity extends ListActivity
 	private InnerDBExec db = null;
 	private String name;
 	private String type;
-	private String amount;
 	private String unit;
 	private String groupData;
 	private ArrayList<String[]> childData = new ArrayList<String[]>();
 	
 	private String sortBy = "";
 	private SimpleAdapter mAdapter = null;
+	private ExpandableAdapter eAdapter = null;
 	private ArrayList<HashMap<String, Object>> list = new ArrayList<HashMap<String, Object>>();
 	private String[] fromColumns = new String[] {
 			InnerDBTable.Record.COLUMN_NAME_DATE,
@@ -55,11 +53,11 @@ public class SingleCurrentActivity extends ListActivity
 			
 	};
 	private int[] toViews = new int[] {
-			R.id.singleCurrentListingDateText,
-			R.id.singleCurrentListingWarehouseText,
+			R.id.singleCurrentListingDateTextView,
+			R.id.singleCurrentListingWarehouseTextView,
 			R.id.singleCurrentListingInoroutImage,
-			R.id.singleCurrentListingAmountText,
-			R.id.singleCurrentListingUnitText,
+			R.id.singleCurrentListingAmountTextView,
+			R.id.singleCurrentListingUnitTextView,
 			R.id.singleCurrentListingStatusImage
 	};
 	
@@ -80,7 +78,6 @@ public class SingleCurrentActivity extends ListActivity
 		Intent intent = getIntent();
 		name = intent.getStringExtra("name");
 		type = intent.getStringExtra("type");
-		amount = intent.getStringExtra("amount");
 		unit = intent.getStringExtra("unit");
 		
 		ActionBar actionBar = getActionBar();
@@ -91,20 +88,14 @@ public class SingleCurrentActivity extends ListActivity
 
 		actionBar.setCustomView(v);
 		
-		((TextView)actionBar.getCustomView().findViewById(R.id.singleCurrentTitle)).setText(name);
+		((TextView)actionBar.getCustomView().findViewById(R.id.singleCurrentTitleTextView)).setText(name);
+		((ImageButton)actionBar.getCustomView().findViewById(R.id.singleCurrentInstockButton)).setOnClickListener(this);
+        ((ImageButton)actionBar.getCustomView().findViewById(R.id.singleCurrentOutstockButton)).setOnClickListener(this);
 		
-		groupData = "现有数量：  " + amount + unit;
-		
-		Cursor c = db.currentSelectByNameAndType(name, type);
-		for (int i=0; i<c.getCount(); i++){
-			childData.add(new String[] {c.getString(2), c.getString(0)+c.getString(1)});
-			c.moveToNext();
-		}
-		
+		eAdapter = new ExpandableAdapter();
 		ExpandableListView expandableListView = (ExpandableListView)findViewById(R.id.singleCurrentAmountExpandable);
-		expandableListView.setAdapter(new ExpandableAdapter());
+		expandableListView.setAdapter(eAdapter);
         
-        updateCursor(db.recordSelectByNameAndType(name, type, ""));
         mAdapter= new SimpleAdapter(this,
         		list,
           		R.layout.single_current_record_listing,
@@ -112,14 +103,30 @@ public class SingleCurrentActivity extends ListActivity
            		toViews);
         setListAdapter(mAdapter);
         
-        Button singleCurrentDateButton = (Button)findViewById(R.id.singleCurrentDateButton);
-        singleCurrentDateButton.setOnClickListener(this);
-        Button singleCurrentWarehouseButton = (Button)findViewById(R.id.singleCurrentWarehouseButton);
-        singleCurrentWarehouseButton.setOnClickListener(this);
-        Button singleCurrentInoroutButton = (Button)findViewById(R.id.singleCurrentInoroutButton);
-        singleCurrentInoroutButton.setOnClickListener(this);
-        Button singleCurrentStatusButton = (Button)findViewById(R.id.singleCurrentStatusButton);
-        singleCurrentStatusButton.setOnClickListener(this);
+        ((Button)findViewById(R.id.singleCurrentDateButton)).setOnClickListener(this);
+        ((Button)findViewById(R.id.singleCurrentWarehouseButton)).setOnClickListener(this);
+        ((Button)findViewById(R.id.singleCurrentInoroutButton)).setOnClickListener(this);
+        ((Button)findViewById(R.id.singleCurrentStatusButton)).setOnClickListener(this);
+	}
+	
+	@Override
+	public void onStart(){
+		super.onStart();
+		
+		updateCursor(db.recordSelectByNameAndType(name, type, ""));
+		mAdapter.notifyDataSetChanged();
+		
+		String[] result= db.currentSelectTotal(name, type);
+		groupData = "现有数量：  " + result[0] + result[1];
+		
+		Cursor c = db.currentSelectByNameAndType(name, type);
+		childData.clear();
+		for (int i=0; i<c.getCount(); i++){
+			childData.add(new String[] {c.getString(2), c.getString(0)+c.getString(1)});
+			c.moveToNext();
+		}
+		eAdapter.notifyDataSetChanged();
+		
 	}
 	
 	private void updateCursor(Cursor c){
@@ -135,12 +142,12 @@ public class SingleCurrentActivity extends ListActivity
   			map.put(InnerDBTable.Record.COLUMN_NAME_AMOUNT, c.getString(2));
   			map.put(InnerDBTable.Record.COLUMN_NAME_UNIT, c.getString(3));
   			
-  			if (c.getString(4).equals("入库"))
+  			if (c.getString(4).equals(getResources().getString(R.string.instock)))
   				map.put(InnerDBTable.Record.COLUMN_NAME_INOROUT, R.drawable.icon_instock);
   			else
   				map.put(InnerDBTable.Record.COLUMN_NAME_INOROUT, R.drawable.icon_outstock);
   			
-  			if (c.getString(5).equals("通过"))
+  			if (c.getString(5).equals(getResources().getString(R.string.passed)))
   				map.put(InnerDBTable.Record.COLUMN_NAME_STATUS, R.drawable.icon_pass);
   			else
   				map.put(InnerDBTable.Record.COLUMN_NAME_STATUS, R.drawable.icon_pending);
@@ -169,9 +176,9 @@ public class SingleCurrentActivity extends ListActivity
         	String[] data = childData.get(childPosition);
         	LayoutInflater inflator = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     		View v = inflator.inflate(R.layout.single_current_expandable_listing, null);
-            TextView warehouseTextview = (TextView) v.findViewById(R.id.singleCurrentExpandableWarehouseText);
+            TextView warehouseTextview = (TextView) v.findViewById(R.id.singleCurrentExpandableWarehouseTextView);
             warehouseTextview.setText(data[0]);
-            TextView amountTextview = (TextView) v.findViewById(R.id.singleCurrentExpandableAmountText);
+            TextView amountTextview = (TextView) v.findViewById(R.id.singleCurrentExpandableAmountTextView);
             amountTextview.setText(data[1]);
             return v;    
         }  
@@ -202,11 +209,11 @@ public class SingleCurrentActivity extends ListActivity
         	LayoutInflater inflator = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     		View v = inflator.inflate(R.layout.single_current_expandable, null);
             ImageView image = (ImageView) v.findViewById(R.id.singleCurrentExpandableImage);
-            if (type.equals("原料"))
+            if (type.equals(getResources().getString(R.string.material)))
             	image.setBackgroundResource(R.drawable.icon_material);
             else
             	image.setBackgroundResource(R.drawable.icon_product);
-            TextView text = (TextView) v.findViewById(R.id.singleCurrentExpandableText);
+            TextView text = (TextView) v.findViewById(R.id.singleCurrentExpandableTextView);
             text.setText(groupData);
             return v;  
         }  
@@ -220,23 +227,14 @@ public class SingleCurrentActivity extends ListActivity
         public boolean isChildSelectable(int groupPosition, int childPosition) {  
             return false;  
         }    
-        private TextView createView(String content) {    
-            AbsListView.LayoutParams layoutParams = new AbsListView.LayoutParams(      
-                    ViewGroup.LayoutParams.FILL_PARENT, 80);      
-            TextView myText = new TextView(SingleCurrentActivity.this);      
-            myText.setLayoutParams(layoutParams);      
-            myText.setGravity(Gravity.CENTER_VERTICAL | Gravity.LEFT);      
-            myText.setPadding(80, 0, 0, 0);      
-            myText.setText(content);    
-            return myText;    
-        }  
     }    
+	
 	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case android.R.id.home:
-			NavUtils.navigateUpFromSameTask(this);
+			finish();
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
@@ -247,86 +245,100 @@ public class SingleCurrentActivity extends ListActivity
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.single_current, menu);
 		return true;
-	}
+	}	
 
 	@Override
 	public void onClick(View v) {
 		int buttonId = v.getId();
-    	String[] sortDetail = sortBy.split(" ");
-    	String sortColumn = "";
-    	Button singleCurrentDateButton = (Button)findViewById(R.id.singleCurrentDateButton);
-        Button singleCurrentWarehouseButton = (Button)findViewById(R.id.singleCurrentWarehouseButton);
-        Button singleCurrentInoroutButton = (Button)findViewById(R.id.singleCurrentInoroutButton);
-        Button singleCurrentStatusButton = (Button)findViewById(R.id.singleCurrentStatusButton);
-    	
-        singleCurrentDateButton.setBackgroundResource(R.drawable.column_button_blue);
-        singleCurrentDateButton.setTextColor(Color.rgb(0, 153, 204));
-        singleCurrentDateButton.setGravity(Gravity.CENTER);
-        singleCurrentWarehouseButton.setBackgroundResource(R.drawable.column_button_blue);
-        singleCurrentWarehouseButton.setTextColor(Color.rgb(0, 153, 204));
-        singleCurrentWarehouseButton.setGravity(Gravity.CENTER);
-        singleCurrentInoroutButton.setBackgroundResource(R.drawable.column_button_blue);
-        singleCurrentInoroutButton.setTextColor(Color.rgb(0, 153, 204));
-        singleCurrentInoroutButton.setGravity(Gravity.CENTER);
-        singleCurrentStatusButton.setBackgroundResource(R.drawable.column_button_blue);
-        singleCurrentStatusButton.setTextColor(Color.rgb(0, 153, 204));
-        singleCurrentStatusButton.setGravity(Gravity.CENTER);
-        
-        Button currentButton = singleCurrentDateButton;
-    	switch (buttonId){
-    	case R.id.singleCurrentDateButton:
-    		sortColumn = InnerDBTable.Record.COLUMN_NAME_DATE;
-    		currentButton = singleCurrentDateButton;
-    		break;
-    	case R.id.singleCurrentWarehouseButton:
-    		sortColumn = InnerDBTable.Record.COLUMN_NAME_WAREHOUSE;
-    		currentButton = singleCurrentWarehouseButton;
-    		break;
-    	case R.id.singleCurrentInoroutButton:
-    		sortColumn = InnerDBTable.Record.COLUMN_NAME_INOROUT;
-    		currentButton = singleCurrentInoroutButton;
-    		break;
-    	case R.id.singleCurrentStatusButton:
-    		sortColumn = InnerDBTable.Record.COLUMN_NAME_STATUS;
-    		currentButton = singleCurrentStatusButton;
-    		break;
-    	}
-    	
-    	if (sortDetail[0].equals(sortColumn) ){
-			if (sortDetail.length == 2) {
-				sortBy = sortColumn;
-				currentButton.setBackgroundResource(R.drawable.column_button_orange);
-				currentButton.setTextColor(Color.rgb(255, 136, 0));
+		
+		if (buttonId == R.id.singleCurrentOutstockButton || buttonId == R.id.singleCurrentInstockButton){
+			Intent intent = new Intent(this, InoroutActivity.class);
+			
+			intent.putExtra("name", name);
+			intent.putExtra("type", type);
+			intent.putExtra("unit", unit);
+			
+			if (buttonId == R.id.singleCurrentInstockButton)
+				intent.putExtra("from", R.id.singleCurrentInstockButton);
+			else
+				intent.putExtra("from", R.id.singleCurrentOutstockButton);
+			startActivity(intent);
+		}
+		else {
+	    	String[] sortDetail = sortBy.split(" ");
+	    	String sortColumn = "";
+	    	Button singleCurrentDateButton = (Button)findViewById(R.id.singleCurrentDateButton);
+	        Button singleCurrentWarehouseButton = (Button)findViewById(R.id.singleCurrentWarehouseButton);
+	        Button singleCurrentInoroutButton = (Button)findViewById(R.id.singleCurrentInoroutButton);
+	        Button singleCurrentStatusButton = (Button)findViewById(R.id.singleCurrentStatusButton);
+	    	
+	        singleCurrentDateButton.setBackgroundResource(R.drawable.column_button_blue);
+	        singleCurrentDateButton.setTextColor(Color.rgb(0, 153, 204));
+	        singleCurrentDateButton.setGravity(Gravity.CENTER);
+	        singleCurrentWarehouseButton.setBackgroundResource(R.drawable.column_button_blue);
+	        singleCurrentWarehouseButton.setTextColor(Color.rgb(0, 153, 204));
+	        singleCurrentWarehouseButton.setGravity(Gravity.CENTER);
+	        singleCurrentInoroutButton.setBackgroundResource(R.drawable.column_button_blue);
+	        singleCurrentInoroutButton.setTextColor(Color.rgb(0, 153, 204));
+	        singleCurrentInoroutButton.setGravity(Gravity.CENTER);
+	        singleCurrentStatusButton.setBackgroundResource(R.drawable.column_button_blue);
+	        singleCurrentStatusButton.setTextColor(Color.rgb(0, 153, 204));
+	        singleCurrentStatusButton.setGravity(Gravity.CENTER);
+	        
+	        Button currentButton = singleCurrentDateButton;
+	    	switch (buttonId){
+	    	case R.id.singleCurrentDateButton:
+	    		sortColumn = InnerDBTable.Record.COLUMN_NAME_DATE;
+	    		currentButton = singleCurrentDateButton;
+	    		break;
+	    	case R.id.singleCurrentWarehouseButton:
+	    		sortColumn = InnerDBTable.Record.COLUMN_NAME_WAREHOUSE;
+	    		currentButton = singleCurrentWarehouseButton;
+	    		break;
+	    	case R.id.singleCurrentInoroutButton:
+	    		sortColumn = InnerDBTable.Record.COLUMN_NAME_INOROUT;
+	    		currentButton = singleCurrentInoroutButton;
+	    		break;
+	    	case R.id.singleCurrentStatusButton:
+	    		sortColumn = InnerDBTable.Record.COLUMN_NAME_STATUS;
+	    		currentButton = singleCurrentStatusButton;
+	    		break;
+	    	}
+	    	
+	    	if (sortDetail[0].equals(sortColumn) ){
+				if (sortDetail.length == 2) {
+					sortBy = sortColumn;
+					currentButton.setBackgroundResource(R.drawable.column_button_orange);
+					currentButton.setTextColor(Color.rgb(255, 136, 0));
+					currentButton.setGravity(Gravity.CENTER_VERTICAL|Gravity.LEFT);
+					currentButton.setPadding(3, 0, 0, 0);
+				}
+				else{
+					sortBy = "";
+				}
+			}
+			else {
+				sortBy = sortColumn + " DESC";
+				currentButton.setBackgroundResource(R.drawable.column_button_green);
+				currentButton.setTextColor(Color.rgb(102, 153, 0));
 				currentButton.setGravity(Gravity.CENTER_VERTICAL|Gravity.LEFT);
 				currentButton.setPadding(3, 0, 0, 0);
 			}
-			else{
-				sortBy = "";
-			}
+	    	
+	    	updateCursor(db.recordSelectByNameAndType(name, type, sortBy));
+	    	mAdapter.notifyDataSetChanged();
 		}
-		else {
-			sortBy = sortColumn + " DESC";
-			currentButton.setBackgroundResource(R.drawable.column_button_green);
-			currentButton.setTextColor(Color.rgb(102, 153, 0));
-			currentButton.setGravity(Gravity.CENTER_VERTICAL|Gravity.LEFT);
-			currentButton.setPadding(3, 0, 0, 0);
-		}
-    	
-    	updateCursor(db.recordSelectByNameAndType(name, type, sortBy));
-    	mAdapter.notifyDataSetChanged();
-		
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public void onListItemClick(ListView listView, View view, int position, long id) {
 		super.onListItemClick(listView, view, position, id);
 		
 		HashMap<String,Object> hashMap = (HashMap<String,Object>)listView.getItemAtPosition(position);
 		
-		Intent intent = new Intent(this, SingleRecordActivity.class);
+		Intent intent = new Intent(SingleCurrentActivity.this, SingleRecordActivity.class);
 		intent.putExtra("id", (String)hashMap.get(InnerDBTable.Record.COLUMN_NAME_RECORD_ID));		
-		//intent.putExtra("type", type);
-		//intent.putExtra("unit", unit);
 		startActivity(intent);
 	}
 

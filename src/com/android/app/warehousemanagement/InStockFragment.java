@@ -82,7 +82,9 @@ public class InStockFragment extends Fragment
     	instockEntryAutocom.setThreshold(1);
     	instockEntryAutocom.setOnItemClickListener(this);
     	
-    	ArrayAdapter<String> typeAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, new String[] {"原料","产品"});
+    	ArrayAdapter<String> typeAdapter = new ArrayAdapter<String>(getActivity(), 
+    			android.R.layout.simple_spinner_item, 
+    			new String[] {getResources().getString(R.string.material), getResources().getString(R.string.product)});
     	typeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
     	instockTypeSpinner.setAdapter(typeAdapter);
     	
