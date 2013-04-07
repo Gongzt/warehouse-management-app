@@ -101,7 +101,7 @@ public class InnerDB extends SQLiteOpenHelper{
 				"('油漆100ml', '总仓库', 2, '原料', '入库', '荣盛发货', '通过', '201204051203', '罐')";
 		db.execSQL(insertSql);
 		insertSql = "INSERT INTO Record (entryname, warehouse, amount, type, inorout, remark, status, date, unit) values " +
-				"('油漆100ml', '佛山仓库', 1, '原料', '入库', '荣盛发货', '通过', '201203060900', '罐')";
+				"('油漆100ml', '佛山仓库', 1, '原料', '入库', '荣盛发货', '待审', '201203060900', '罐')";
 		db.execSQL(insertSql);
 		insertSql = "INSERT INTO Record (entryname, warehouse, amount, type, inorout, remark, status, date, unit) values " +
 				"('油漆100ml', '总仓库', 1, '原料', '出库', '星期六订单', '通过', '201205051600', '罐')";
@@ -113,16 +113,16 @@ public class InnerDB extends SQLiteOpenHelper{
 				"('ST&SAT盒子', '总仓库', 2, '产品', '入库', '星期六订单', '通过', '201206061400', '个')";
 		db.execSQL(insertSql);
 		insertSql = "INSERT INTO Record (entryname, warehouse, amount, type, inorout, remark, status, date, unit) values " +
-				"('ST&SAT盒子', '佛山仓库', 5, '产品', '入库', '星期六订单', '通过', '201206061500', '个')";
+				"('ST&SAT盒子', '佛山仓库', 5, '产品', '入库', '星期六订单', '待审', '201206061500', '个')";
 		db.execSQL(insertSql);
 		insertSql = "INSERT INTO Record (entryname, warehouse, amount, type, inorout, remark, status, date, unit) values " +
 				"('哈哈盒子', '总仓库', 1, '产品', '出库', '哈哈订单', '通过', '201207081600', '个')";
 		db.execSQL(insertSql);
 		insertSql = "INSERT INTO Record (entryname, warehouse, amount, type, inorout, remark, status, date, unit) values " +
-				"('ST&SAT盒子', '总仓库', 7, '产品', '出库', '星期六订单', '待审', '201207081023', '个')";
+				"('ST&SAT盒子', '总仓库', 6, '产品', '出库', '星期六订单', '待审', '201207081023', '个')";
 		db.execSQL(insertSql);
 		insertSql = "INSERT INTO Record (entryname, warehouse, amount, type, inorout, remark, status, date, unit) values " +
-				"('双铜纸100*100', '广州仓库', 2, '原料', '出库', '百丽发货', '待审', '201204201502', '吨')";
+				"('双铜纸100*100', '总仓库', 2, '原料', '出库', '百丽发货', '待审', '201204201502', '吨')";
 		db.execSQL(insertSql);
 		
 		//initiate record database

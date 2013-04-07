@@ -88,18 +88,18 @@ public class TabManager implements TabHost.OnTabChangeListener {
 //                    ft.detach(mLastTab.fragment);
 //                }
 //            }
-            
+//            
             if (newTab != null) {
             	if (newTab.fragment == null){
             		newTab.fragment = Fragment.instantiate(mActivity,
             				newTab.clss.getName(), newTab.args);
+            		ft.attach(newTab.fragment);
             	}
             	
             	if (mLastTab == null)
             		ft.add(mContainerId, newTab.fragment, newTab.tag);
             	else
             		ft.replace(mContainerId, newTab.fragment);
-            	//ft.attach(newTab.fragment);
             }
             else{
                 Log.e("MainTabActivity","newTab == null");
