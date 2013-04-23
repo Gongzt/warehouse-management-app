@@ -1,5 +1,7 @@
 package com.android.app.warehousemanagement;
 
+import java.util.HashMap;
+
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -8,7 +10,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
-import android.database.Cursor;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -18,18 +20,204 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.android.app.warehousemanagement.db.InnerDBExec;
+import com.android.app.warehousemanagement.db.OutterDBExec.OutterDBException;
+import com.android.app.warehousemanagement.db.SqlDBInterface;
+import com.android.app.warehousemanagement.db.SqlDBTable;
 
 public class SingleRecordActivity extends Activity 
                                   implements View.OnClickListener{
-
-	private InnerDBExec db = null;
-	private String id;
+	
+	private SqlDBInterface db = null;
+	private int id;
 	private String name;
-	private String type;
+	private int type;
 	private String warehouse;
-	private int change;
+	private int amount;
 	private String unit;
+	private int inorout;
+	private int status;
+	private String remark;
+	private String date;
+	
+	private class InitialTask extends AsyncTask<String, Integer, HashMap<String,Object>>{
+
+		@Override
+		protected void onPreExecute(){
+			db.showWaiting(true, false);
+		}
+		
+	    @Override
+	    protected HashMap<String,Object> doInBackground(String... params) {
+	    	HashMap<String,Object> map = new HashMap<String,Object>();
+	    	try{
+	    		map = db.recordSelectById(id);
+	    	}
+	    	catch (OutterDBException e){
+	    		db.showExceptionDialog(e);
+	    		return null;
+	    	}
+	    	publishProgress(100); 
+	        return map;
+	    }
+	    
+	    @Override  
+        protected void onProgressUpdate(Integer... progress) {  
+	    	db.setWaiting(progress[0]);
+            super.onProgressUpdate(progress);  
+        }  
+
+	    @Override
+	    protected void onPostExecute(HashMap<String,Object> result) {
+	    	if (result != null) {
+		    	name = result.get(SqlDBTable.Entry.COLUMN_NAME_NAME).toString();
+				type = Integer.parseInt(result.get(SqlDBTable.Entry.COLUMN_NAME_TYPE).toString());
+				warehouse = result.get(SqlDBTable.Warehouse.COLUMN_NAME_NAME).toString();
+				amount = Integer.parseInt(result.get(SqlDBTable.Record.COLUMN_NAME_AMOUNT).toString());
+				unit = result.get(SqlDBTable.Entry.COLUMN_NAME_UNIT).toString();
+				status = Integer.parseInt(result.get(SqlDBTable.Record.COLUMN_NAME_STATUS).toString());
+				remark = result.get(SqlDBTable.Record.COLUMN_NAME_REMARK).toString();
+				date = result.get(SqlDBTable.Record.COLUMN_NAME_DATE).toString();
+				
+				ActionBar actionBar = getActionBar();
+				
+				if (status == 1){
+					actionBar.setTitle(name);
+				}
+				else {
+					actionBar.setDisplayShowCustomEnabled(true);
+					
+					LayoutInflater inflator = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+					View v = inflator.inflate(R.layout.single_record_actionbar, null);
+					
+					actionBar.setCustomView(v);
+					
+					((TextView)actionBar.getCustomView().findViewById(R.id.singleRecordTitle)).setText(name);
+					((ImageView)actionBar.getCustomView().findViewById(R.id.singleRecordPassButton)).setOnClickListener(SingleRecordActivity.this);
+					((ImageView)actionBar.getCustomView().findViewById(R.id.singleRecordDeleteButton)).setOnClickListener(SingleRecordActivity.this);
+				}
+				
+				if (type == 0)
+					((ImageView)findViewById(R.id.singleRecordTypeImage)).setBackgroundResource(R.drawable.icon_material);
+				else
+					((ImageView)findViewById(R.id.singleRecordTypeImage)).setBackgroundResource(R.drawable.icon_product);
+				
+				((TextView)findViewById(R.id.singleRecordEntryTextView)).setText(name);
+				((TextView)findViewById(R.id.singleRecordWarehouseTextView)).setText(warehouse);
+				
+				if (inorout == 0)
+					((ImageView)findViewById(R.id.singleRecordInoroutImage)).setBackgroundResource(R.drawable.icon_instock);
+				else
+					((ImageView)findViewById(R.id.singleRecordInoroutImage)).setBackgroundResource(R.drawable.icon_outstock);
+				
+				((TextView)findViewById(R.id.singleRecordDateTextView)).setText(date);
+	
+				if (status == 1)
+					((ImageView)findViewById(R.id.singleRecordStatusImage)).setBackgroundResource(R.drawable.icon_pass);
+				else
+					((ImageView)findViewById(R.id.singleRecordStatusImage)).setBackgroundResource(R.drawable.icon_pending);
+				
+				((TextView)findViewById(R.id.singleRecordAmountTextView)).setText(amount+unit);
+				((TextView)findViewById(R.id.singleRecordRemarkTextView)).setText("       "+remark);
+		    	
+	    	}
+			db.hideWaiting();
+	        super.onPostExecute(result);
+	    }
+	}
+	
+	private class DeleteTask extends AsyncTask<Integer, Integer, Integer>{
+
+		@Override
+		protected void onPreExecute(){
+			db.showWaiting(true, false);
+		}
+		
+	    @Override
+	    protected Integer doInBackground(Integer... params) {
+	    	try {
+	    		db.recordDelete(id);
+	    	}
+	    	catch (OutterDBException e){
+	    		db.showExceptionDialog(e);
+	    		return 0;
+	    	}
+	    	publishProgress(100);  
+	    	return 1;
+	    }
+	    
+	    @Override  
+        protected void onProgressUpdate(Integer... progress) {  
+	    	db.setWaiting(progress[0]);
+            super.onProgressUpdate(progress);  
+        }  
+
+	    @Override
+	    protected void onPostExecute(Integer result) {
+	    	if (result == 1){
+		    	AlertDialog.Builder completeDialog = new Builder(SingleRecordActivity.this);
+				completeDialog.setMessage("物品出入库记录已删除！");
+				completeDialog.setTitle("成功删除提示");
+				completeDialog.setPositiveButton("确认", new OnClickListener() { 
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.dismiss();
+						finish();
+					}
+				});
+				completeDialog.create().show();
+		    	
+	    	}
+			db.hideWaiting();
+	        super.onPostExecute(result);
+	    }
+	}
+	
+	private class PassTask extends AsyncTask<Integer, Integer, Integer>{
+
+		@Override
+		protected void onPreExecute(){
+			db.showWaiting(true, false);
+		}
+		
+	    @Override
+	    protected Integer doInBackground(Integer... params) {
+	    	try {
+	    		db.recordUpdate(id);
+	    	}
+	    	catch (OutterDBException e){
+	    		db.showExceptionDialog(e);
+	    		return 0;
+	    	}
+	    	publishProgress(100);  
+	    	return 1;
+	    }
+	    
+	    @Override  
+        protected void onProgressUpdate(Integer... progress) {  
+	    	db.setWaiting(progress[0]);
+            super.onProgressUpdate(progress);  
+        }  
+
+	    @Override
+	    protected void onPostExecute(Integer result) {
+	    	if (result == 1){
+		    	AlertDialog.Builder completeDialog = new Builder(SingleRecordActivity.this);
+				completeDialog.setMessage("物品出入库记录已通过！");
+				completeDialog.setTitle("成功通过提示");
+				completeDialog.setPositiveButton("确认", new OnClickListener() { 
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.dismiss();
+						finish();
+					}
+				});
+				completeDialog.create().show();
+		    	
+	    	}
+			db.hideWaiting();
+	        super.onPostExecute(result);
+	    }
+	}
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -42,62 +230,14 @@ public class SingleRecordActivity extends Activity
 			getActionBar().setDisplayHomeAsUpEnabled(true);
 		}
 		
-		db = new InnerDBExec(this);
+		db = new SqlDBInterface(this);
 		
 		Intent intent = getIntent();
 		
-		id = intent.getStringExtra("id");
-		Cursor c = db.recordSelectById(id);	
+		id = intent.getIntExtra("id", 0);
 		
-		name = c.getString(1);
-		type = c.getString(2);
-		warehouse = c.getString(3);
-		if (c.getString(6).equals(getResources().getString(R.string.instock)))
-			change = Integer.parseInt(c.getString(4));
-		else
-			change = -1*Integer.parseInt(c.getString(4));
-		unit = c.getString(5);
-		
-		ActionBar actionBar = getActionBar();
-		
-		if (c.getString(7).equals(getResources().getString(R.string.passed))){
-			actionBar.setTitle(name);
-		}
-		else {
-			actionBar.setDisplayShowCustomEnabled(true);
-			
-			LayoutInflater inflator = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			View v = inflator.inflate(R.layout.single_record_actionbar, null);
-			
-			actionBar.setCustomView(v);
-			
-			((TextView)actionBar.getCustomView().findViewById(R.id.singleRecordTitle)).setText(c.getString(1));
-			((ImageView)actionBar.getCustomView().findViewById(R.id.singleRecordPassButton)).setOnClickListener(this);
-			((ImageView)actionBar.getCustomView().findViewById(R.id.singleRecordDeleteButton)).setOnClickListener(this);
-		}
-		
-		if (c.getString(2).equals(getResources().getString(R.string.material)))
-			((ImageView)findViewById(R.id.singleRecordTypeImage)).setBackgroundResource(R.drawable.icon_material);
-		else
-			((ImageView)findViewById(R.id.singleRecordTypeImage)).setBackgroundResource(R.drawable.icon_product);
-		
-		((TextView)findViewById(R.id.singleRecordEntryTextView)).setText(c.getString(1));
-		((TextView)findViewById(R.id.singleRecordWarehouseTextView)).setText(c.getString(3));
-		
-		if (c.getString(6).equals(getResources().getString(R.string.instock)))
-			((ImageView)findViewById(R.id.singleRecordInoroutImage)).setBackgroundResource(R.drawable.icon_instock);
-		else
-			((ImageView)findViewById(R.id.singleRecordInoroutImage)).setBackgroundResource(R.drawable.icon_outstock);
-		
-		((TextView)findViewById(R.id.singleRecordDateTextView)).setText(c.getString(9));
-
-		if (c.getString(7).equals(getResources().getString(R.string.passed)))
-			((ImageView)findViewById(R.id.singleRecordStatusImage)).setBackgroundResource(R.drawable.icon_pass);
-		else
-			((ImageView)findViewById(R.id.singleRecordStatusImage)).setBackgroundResource(R.drawable.icon_pending);
-		
-		((TextView)findViewById(R.id.singleRecordAmountTextView)).setText(c.getString(4)+c.getString(5));
-		((TextView)findViewById(R.id.singleRecordRemarkTextView)).setText("       "+c.getString(8));
+		InitialTask initialTask = new InitialTask();
+		initialTask.execute();
 		
 	}
 
@@ -131,8 +271,9 @@ public class SingleRecordActivity extends Activity
 			AlertDialog.setPositiveButton("确认",new OnClickListener() { 
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
-					db.recordDelete(id);
-					finish();
+					DeleteTask deleteTask = new DeleteTask();
+					deleteTask.execute();
+					
 					dialog.dismiss();
 				}
 			});
@@ -150,11 +291,11 @@ public class SingleRecordActivity extends Activity
 			AlertDialog.setPositiveButton("确认",new OnClickListener() { 
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
-					db.currentUpdate(name, type, warehouse, change, unit);
-					db.recordUpdate(id);
-					dialog.dismiss();
 					
-					finish();
+					PassTask passTask = new PassTask();
+					passTask.execute();
+					
+					dialog.dismiss();
 				}
 			});
 			AlertDialog.setNegativeButton("取消",new OnClickListener() { 
