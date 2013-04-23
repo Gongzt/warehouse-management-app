@@ -1,6 +1,7 @@
 package com.android.app.warehousemanagement;
 
-import java.util.Calendar;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import android.app.ActionBar;
 import android.app.AlertDialog;
@@ -8,6 +9,7 @@ import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -21,15 +23,17 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.SimpleAdapter;
 import android.widget.Spinner;
-import android.widget.TextView;
 
-import com.android.app.warehousemanagement.db.InnerDBExec;
+import com.android.app.warehousemanagement.db.OutterDBExec.OutterDBException;
+import com.android.app.warehousemanagement.db.SqlDBInterface;
+import com.android.app.warehousemanagement.db.SqlDBTable;
 
 public class InStockFragment extends Fragment
 							 implements AdapterView.OnItemClickListener, View.OnClickListener, OnClickListener{
 	
-	private InnerDBExec db = null;
+	private SqlDBInterface db = null;
 	private InputMethodManager inputManager = null;
 	
 	private AutoCompleteTextView instockEntryAutocom = null;
@@ -38,6 +42,132 @@ public class InStockFragment extends Fragment
 	private EditText instockRemarkEdittext = null;
 	private Spinner instockTypeSpinner = null;
 	private Spinner instockWarehouseSpinner = null;
+	
+	private class InsertTask extends AsyncTask<String, Integer, Integer>{
+
+		@Override
+		protected void onPreExecute(){
+			db.showWaiting(true, true);
+		}
+		
+	    @Override
+	    protected Integer doInBackground(String... params) {
+	    	
+	    	int type;
+			if (instockTypeSpinner.getSelectedItem().toString().equals("原料"))
+				type = 0;
+			else
+				type = 1;
+	    	
+			try {
+				db.recordInsert(instockEntryAutocom.getText().toString(),
+		    					 type, instockUnitEdittext.getText().toString(),
+		    					 0, Integer.parseInt(instockAmountEdittext.getText().toString()), 
+		    					 getWarehouseId(), 
+		    					 instockRemarkEdittext.getText().toString());
+			}
+			catch (OutterDBException e){
+				db.showExceptionDialog(e);
+				publishProgress(100);
+				return 0;
+			}
+	    	publishProgress(100);
+	    	
+	    	return 1;
+	    }
+	    
+	    @Override  
+        protected void onProgressUpdate(Integer... progress) {  
+	    	db.setWaiting(progress[0]);
+            super.onProgressUpdate(progress);  
+        }  
+
+	    @Override
+	    protected void onPostExecute(Integer result) {
+	    	
+	    	instockEntryAutocom.setText("");
+			instockAmountEdittext.setText("");
+			instockUnitEdittext.setText("");
+			instockRemarkEdittext.setText("");
+			instockTypeSpinner.setSelection(0);
+			instockWarehouseSpinner.setSelection(0);
+			
+			db.hideWaiting();
+	    	
+			if (result == 1) {
+		    	AlertDialog.Builder completeDialog = new Builder(getActivity());
+				completeDialog.setMessage("物品入库成功");
+				completeDialog.setTitle("入库完成提示");
+				completeDialog.setPositiveButton("确认", new OnClickListener() { 
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.dismiss();
+					}
+				});
+				completeDialog.create().show();
+			}
+	    	
+	        super.onPostExecute(result);
+	    }
+	}
+
+	
+	private class InitialTask extends AsyncTask<String, Integer, ArrayList<ArrayList<HashMap<String,Object>>>>{
+
+		@Override
+		protected void onPreExecute(){
+			db.showWaiting(true, false);
+		}
+		
+	    @Override
+	    protected ArrayList<ArrayList<HashMap<String,Object>>> doInBackground(String... params) {
+	    	ArrayList<ArrayList<HashMap<String,Object>>> result = new ArrayList<ArrayList<HashMap<String,Object>>>();
+	    	ArrayList<HashMap<String,Object>> entryList = new ArrayList<HashMap<String,Object>>();
+	    	ArrayList<HashMap<String,Object>> warehouseList = new ArrayList<HashMap<String,Object>>();
+	    	
+	    	try{
+		    	entryList = db.entrySelectAll();
+		    	publishProgress(50); 
+		    	warehouseList = db.warehouseSelectAll();
+	    	}
+	    	catch (OutterDBException e){
+	    		db.showExceptionDialog(e);
+	    	}
+	    	
+	    	result.add(entryList);
+	    	result.add(warehouseList);
+	    	publishProgress(100);
+	        return result;
+	    }
+	    
+	    @Override  
+        protected void onProgressUpdate(Integer... progress) {  
+	    	db.setWaiting(progress[0]);
+            super.onProgressUpdate(progress);  
+        }  
+
+	    @Override
+	    protected void onPostExecute(ArrayList<ArrayList<HashMap<String,Object>>> result) {
+	    	
+	    	SimpleAdapter entryAdapter = new SimpleAdapter(getActivity(), 
+	    			result.get(0), 
+	    			R.layout.simple_list_item, 
+	    			new String[]{SqlDBTable.Entry.COLUMN_NAME_NAME}, 
+	    			new int[]{R.id.simpleListText});    
+	    	instockEntryAutocom.setAdapter(entryAdapter);  
+	    	instockEntryAutocom.setOnItemClickListener(InStockFragment.this);
+	    	
+	    	SimpleAdapter warehouseAdapter = new SimpleAdapter(getActivity(),
+	        		result.get(1),
+	          		R.layout.simple_list_item,
+	           		new String[]{SqlDBTable.Warehouse.COLUMN_NAME_NAME},
+	           		new int[] {R.id.simpleListText});
+	    	instockWarehouseSpinner.setAdapter(warehouseAdapter);
+	    	
+	    	db.hideWaiting();
+	        super.onPostExecute(result);
+	    }
+	}
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -61,7 +191,7 @@ public class InStockFragment extends Fragment
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
         Bundle savedInstanceState) {
     	
-    	db = new InnerDBExec(getActivity());
+    	db = new SqlDBInterface(getActivity());
 
     	return inflater.inflate(R.layout.instock_fragment, container, false);
     }
@@ -77,20 +207,14 @@ public class InStockFragment extends Fragment
     	instockTypeSpinner = (Spinner)getView().findViewById(R.id.instockTypeSpinner);
     	instockWarehouseSpinner = (Spinner)getView().findViewById(R.id.instockWarehouseSpinner);
     	
-    	ArrayAdapter<String> entryAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_dropdown_item_1line, db.currentSearchName(""));    
-    	instockEntryAutocom.setAdapter(entryAdapter);  
-    	instockEntryAutocom.setThreshold(1);
-    	instockEntryAutocom.setOnItemClickListener(this);
+    	InitialTask initialTask = new InitialTask();
+    	initialTask.execute();
     	
     	ArrayAdapter<String> typeAdapter = new ArrayAdapter<String>(getActivity(), 
     			android.R.layout.simple_spinner_item, 
     			new String[] {getResources().getString(R.string.material), getResources().getString(R.string.product)});
     	typeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
     	instockTypeSpinner.setAdapter(typeAdapter);
-    	
-    	ArrayAdapter<String> warehouseAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, db.warehouseSelectAll());
-    	warehouseAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-    	instockWarehouseSpinner.setAdapter(warehouseAdapter);
 
     	ImageButton actionbarCleanButton = (ImageButton)getActivity().getActionBar().getCustomView().findViewById(R.id.actionbarCleanButton);
     	actionbarCleanButton.setOnClickListener(this);
@@ -99,21 +223,38 @@ public class InStockFragment extends Fragment
     	
     	inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE); 
     }
+    
+    @SuppressWarnings("unchecked")
+	private String getWarehouseName (){
+		Spinner inoroutWarehouseSpinner = (Spinner)getView().findViewById(R.id.instockWarehouseSpinner);
+		HashMap<String,Object> map = (HashMap<String,Object>)inoroutWarehouseSpinner.getAdapter()
+				.getItem(inoroutWarehouseSpinner.getSelectedItemPosition());
+		return map.get(SqlDBTable.Warehouse.COLUMN_NAME_NAME).toString();
+	}
+	
+	@SuppressWarnings("unchecked")
+	private int getWarehouseId (){
+		Spinner inoroutWarehouseSpinner = (Spinner)getView().findViewById(R.id.instockWarehouseSpinner);
+		HashMap<String,Object> map = (HashMap<String,Object>)inoroutWarehouseSpinner.getAdapter()
+				.getItem(inoroutWarehouseSpinner.getSelectedItemPosition());
+		return Integer.parseInt(map.get(SqlDBTable.Warehouse.COLUMN_NAME_ID).toString());
+	}
 
     
-    @Override
+    @SuppressWarnings("unchecked")
+	@Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id){
-    	String entryName = ((TextView) view).getText().toString();
-    	String[] info = db.currentSelectByName(entryName);
+    	HashMap<String,Object> hashMap = (HashMap<String,Object>)parent.getItemAtPosition(position);
+    	instockEntryAutocom.setText(hashMap.get(SqlDBTable.Entry.COLUMN_NAME_NAME).toString());
     	
     	Spinner typeSpinner = (Spinner)getView().findViewById(R.id.instockTypeSpinner);
-    	if (info[0].equals("原料"))
+    	if (Integer.parseInt(hashMap.get(SqlDBTable.Entry.COLUMN_NAME_TYPE).toString()) == 0)
     		typeSpinner.setSelection(0);
     	else
     		typeSpinner.setSelection(1);
     	
     	EditText unitEditText = (EditText)getView().findViewById(R.id.instockUnitEdittext);
-    	unitEditText.setText(info[1]);
+    	unitEditText.setText(hashMap.get(SqlDBTable.Entry.COLUMN_NAME_UNIT).toString());
     }
 
 	@Override
@@ -147,8 +288,12 @@ public class InStockFragment extends Fragment
 			AlertDialog.create().show();
 		}
 		else{
-			
-			AlertDialog.setMessage("确认入库所填信息？");
+			AlertDialog.setMessage("请确认入库信息：\n" +
+									"名称： " + instockEntryAutocom.getText().toString() + "\n" +
+									"类型： " + instockTypeSpinner.getSelectedItem().toString() + "\n" + 
+									"数量： " + instockAmountEdittext.getText().toString() +
+									instockUnitEdittext.getText().toString() + "\n" +
+									"仓库： " + getWarehouseName());
 			AlertDialog.setTitle("入库提示");
 			AlertDialog.setPositiveButton("确认", new OnClickListener() { 
 				@Override
@@ -156,34 +301,23 @@ public class InStockFragment extends Fragment
 					inputManager.hideSoftInputFromWindow(
 			                getActivity().getCurrentFocus().getWindowToken(),
 			                InputMethodManager.HIDE_NOT_ALWAYS); 
-					db.recordInsert(instockEntryAutocom.getText().toString(), 
-							instockTypeSpinner.getSelectedItem().toString(), 
-							instockWarehouseSpinner.getSelectedItem().toString(), 
-							Integer.parseInt(instockAmountEdittext.getText().toString()), 
-							instockUnitEdittext.getText().toString(), 
-							"入库",
-							"待审",
-							instockRemarkEdittext.getText().toString(),
-							Calendar.getInstance());
 					
-					instockEntryAutocom.setText("");
-					instockAmountEdittext.setText("");
-					instockUnitEdittext.setText("");
-					instockRemarkEdittext.setText("");
-					instockTypeSpinner.setSelection(0);
-					instockWarehouseSpinner.setSelection(0);
+//					int type;
+//					if (instockTypeSpinner.getSelectedItem().toString().equals("原料"))
+//						type = 0;
+//					else
+//						type = 1;
+//					db.recordInsert(instockEntryAutocom.getText().toString(), 
+//							type, 
+//							getWarehouseId(), 
+//							Integer.parseInt(instockAmountEdittext.getText().toString()), 
+//							instockUnitEdittext.getText().toString(), 
+//							0,
+//							instockRemarkEdittext.getText().toString());
+					InsertTask insertTask = new InsertTask();
+					insertTask.execute();
+					
 					dialog.dismiss();
-					
-					AlertDialog.Builder completeDialog = new Builder(getActivity());
-					completeDialog.setMessage("物品入库成功");
-					completeDialog.setTitle("入库完成提示");
-					completeDialog.setPositiveButton("确认", new OnClickListener() { 
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							dialog.dismiss();
-						}
-					});
-					completeDialog.create().show();
 				}
 			});
 			AlertDialog.setNegativeButton("取消",new OnClickListener() { 

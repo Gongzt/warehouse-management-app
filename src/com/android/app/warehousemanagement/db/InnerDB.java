@@ -7,50 +7,57 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class InnerDB extends SQLiteOpenHelper{
 
-	public static final int DATABASE_VERSION = 3;
+	public static final int DATABASE_VERSION = 1;
 	public static final String DATABASE_NAME = "Warehouse.db";
 	private static final String INTEGER_TYPE = " Integer";
 	private static final String TEXT_TYPE = " VARCHAR";
 	private static final String COMMA_SEP = ",";
 	
 	private static final String SQL_CREATE_CURRENT =    
-			"CREATE TABLE " + InnerDBTable.Current.TABLE_NAME + " (" +
-			InnerDBTable.Current.COLUMN_NAME_ENTRY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
-			InnerDBTable.Current.COLUMN_NAME_ENTRY_NAME + TEXT_TYPE + COMMA_SEP +
-			InnerDBTable.Current.COLUMN_NAME_ENTRY_TYPE + TEXT_TYPE + COMMA_SEP +
-			InnerDBTable.Current.COLUMN_NAME_WAREHOUSE + TEXT_TYPE + COMMA_SEP +
-			InnerDBTable.Current.COLUMN_NAME_AMOUNT + INTEGER_TYPE + COMMA_SEP +
-			InnerDBTable.Current.COLUMN_NAME_UNIT + TEXT_TYPE +
+			"CREATE TABLE " + SqlDBTable.Current.TABLE_NAME + " (" +
+			SqlDBTable.Current.COLUMN_NAME_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
+			SqlDBTable.Current.COLUMN_NAME_ENTRY_ID + INTEGER_TYPE + COMMA_SEP +
+			SqlDBTable.Current.COLUMN_NAME_WAREHOUSE_ID + INTEGER_TYPE + COMMA_SEP +
+			SqlDBTable.Current.COLUMN_NAME_AMOUNT + TEXT_TYPE +
+			" )";
+	
+	private static final String SQL_CREATE_ENTRY =    
+			"CREATE TABLE " + SqlDBTable.Entry.TABLE_NAME + " (" +
+			SqlDBTable.Entry.COLUMN_NAME_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
+			SqlDBTable.Entry.COLUMN_NAME_NAME + TEXT_TYPE + COMMA_SEP +
+			SqlDBTable.Entry.COLUMN_NAME_TYPE + TEXT_TYPE + COMMA_SEP +
+			SqlDBTable.Entry.COLUMN_NAME_UNIT + TEXT_TYPE +
 			" )";
 	
 	private static final String SQL_CREATE_RECORD = 
-			"CREATE TABLE " + InnerDBTable.Record.TABLE_NAME + " (" +
-			InnerDBTable.Record.COLUMN_NAME_RECORD_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
-			InnerDBTable.Record.COLUMN_NAME_ENTRY_NAME + TEXT_TYPE + COMMA_SEP +
-			InnerDBTable.Record.COLUMN_NAME_ENTRY_TYPE + TEXT_TYPE + COMMA_SEP +
-			InnerDBTable.Record.COLUMN_NAME_WAREHOUSE + TEXT_TYPE + COMMA_SEP +
-			InnerDBTable.Record.COLUMN_NAME_INOROUT + TEXT_TYPE + COMMA_SEP +
-			InnerDBTable.Record.COLUMN_NAME_REMARK + TEXT_TYPE + COMMA_SEP +
-			InnerDBTable.Record.COLUMN_NAME_STATUS + TEXT_TYPE + COMMA_SEP +
-			InnerDBTable.Record.COLUMN_NAME_DATE + TEXT_TYPE + COMMA_SEP +
-			InnerDBTable.Record.COLUMN_NAME_AMOUNT + INTEGER_TYPE + COMMA_SEP +
-			InnerDBTable.Record.COLUMN_NAME_UNIT + TEXT_TYPE + 
+			"CREATE TABLE " + SqlDBTable.Record.TABLE_NAME + " (" +
+			SqlDBTable.Record.COLUMN_NAME_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
+			SqlDBTable.Record.COLUMN_NAME_ENTRY_ID + INTEGER_TYPE + COMMA_SEP +
+			SqlDBTable.Record.COLUMN_NAME_WAREHOUSE_ID + INTEGER_TYPE + COMMA_SEP +
+			SqlDBTable.Record.COLUMN_NAME_INOROUT + INTEGER_TYPE + COMMA_SEP +
+			SqlDBTable.Record.COLUMN_NAME_REMARK + TEXT_TYPE + COMMA_SEP +
+			SqlDBTable.Record.COLUMN_NAME_AMOUNT + INTEGER_TYPE + COMMA_SEP +
+			SqlDBTable.Record.COLUMN_NAME_STATUS + INTEGER_TYPE + COMMA_SEP +
+			SqlDBTable.Record.COLUMN_NAME_DATE + TEXT_TYPE + 
 			" )";
 	
 	private static final String SQL_CREATE_WAREHOUSE =    
-			"CREATE TABLE " + InnerDBTable.Warehouse.TABLE_NAME + " (" +
-			InnerDBTable.Warehouse.COLUMN_NAME_WAREHOUSE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
-			InnerDBTable.Warehouse.COLUMN_NAME_WAREHOUSE_NAME + TEXT_TYPE + 
+			"CREATE TABLE " + SqlDBTable.Warehouse.TABLE_NAME + " (" +
+			SqlDBTable.Warehouse.COLUMN_NAME_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
+			SqlDBTable.Warehouse.COLUMN_NAME_NAME + TEXT_TYPE + 
 			" )";
 	
 	private static final String SQL_DELETE_CURRENT =    
-			"DROP TABLE IF EXISTS " + InnerDBTable.Current.TABLE_NAME;
+			"DROP TABLE IF EXISTS " + SqlDBTable.Current.TABLE_NAME;
+	
+	private static final String SQL_DELETE_ENTRY =    
+			"DROP TABLE IF EXISTS " + SqlDBTable.Entry.TABLE_NAME;
 	
 	private static final String SQL_DELETE_RECORD =    
-			"DROP TABLE IF EXISTS " + InnerDBTable.Record.TABLE_NAME;
+			"DROP TABLE IF EXISTS " + SqlDBTable.Record.TABLE_NAME;
 	
 	private static final String SQL_DELETE_WAREHOUSE =    
-			"DROP TABLE IF EXISTS " + InnerDBTable.Warehouse.TABLE_NAME;
+			"DROP TABLE IF EXISTS " + SqlDBTable.Warehouse.TABLE_NAME;
 	
 	public InnerDB(Context context){
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -61,9 +68,18 @@ public class InnerDB extends SQLiteOpenHelper{
 		db.execSQL(SQL_CREATE_CURRENT);
 		db.execSQL(SQL_CREATE_RECORD);
 		db.execSQL(SQL_CREATE_WAREHOUSE);
+		db.execSQL(SQL_CREATE_ENTRY);
+		
+		String insertSql = "INSERT INTO warehouse (Warehouse_Name) values ('总仓库')";
+		db.execSQL(insertSql);
+		insertSql = "INSERT INTO warehouse (Warehouse_Name) values ('广州仓库')";
+		db.execSQL(insertSql);
+		insertSql = "INSERT INTO warehouse (Warehouse_Name) values ('佛山仓库')";
+		db.execSQL(insertSql);
+		
 		
 		// Initiate Current table
-		String insertSql = "INSERT INTO Current (entryname, warehouse, amount, type, unit) values ('油漆100ml', '总仓库', 5, '原料', '罐')";
+		/*String insertSql = "INSERT INTO Current (entryname, warehouse, amount, type, unit) values ('油漆100ml', '总仓库', 5, '原料', '罐')";
 		db.execSQL(insertSql);
 		insertSql = "INSERT INTO Current (entryname, warehouse, amount, type, unit) values ('油漆100ml', '佛山仓库', 6, '原料', '罐')";
 		db.execSQL(insertSql);
@@ -94,10 +110,10 @@ public class InnerDB extends SQLiteOpenHelper{
 		insertSql = "INSERT INTO Current (entryname, warehouse, amount, type, unit) values ('华伦盒子', '佛山仓库', 5, '产品', '个')";
 		db.execSQL(insertSql);
 		insertSql = "INSERT INTO Current (entryname, warehouse, amount, type, unit) values ('哈哈盒子', '总仓库', 12, '产品', '个')";
-		db.execSQL(insertSql);
+		db.execSQL(insertSql);*/
 		
 		//initiate record database
-		insertSql = "INSERT INTO Record (entryname, warehouse, amount, type, inorout, remark, status, date, unit) values " +
+		/*insertSql = "INSERT INTO Record (entryname, warehouse, amount, type, inorout, remark, status, date, unit) values " +
 				"('油漆100ml', '总仓库', 2, '原料', '入库', '荣盛发货', '通过', '201204051203', '罐')";
 		db.execSQL(insertSql);
 		insertSql = "INSERT INTO Record (entryname, warehouse, amount, type, inorout, remark, status, date, unit) values " +
@@ -123,15 +139,15 @@ public class InnerDB extends SQLiteOpenHelper{
 		db.execSQL(insertSql);
 		insertSql = "INSERT INTO Record (entryname, warehouse, amount, type, inorout, remark, status, date, unit) values " +
 				"('双铜纸100*100', '总仓库', 2, '原料', '出库', '百丽发货', '待审', '201204201502', '吨')";
-		db.execSQL(insertSql);
+		db.execSQL(insertSql);*/
 		
 		//initiate record database
-				insertSql = "INSERT INTO Warehouse (warehousename) values ('总仓库')";
+		/*		insertSql = "INSERT INTO Warehouse (warehousename) values ('总仓库')";
 				db.execSQL(insertSql);
 				insertSql = "INSERT INTO Warehouse (warehousename) values ('佛山仓库')";
 				db.execSQL(insertSql);
 				insertSql = "INSERT INTO Warehouse (warehousename) values ('广州仓库')";
-				db.execSQL(insertSql);
+				db.execSQL(insertSql);*/
 		
 	}
 	
@@ -140,6 +156,7 @@ public class InnerDB extends SQLiteOpenHelper{
 		db.execSQL(SQL_DELETE_CURRENT);
 		db.execSQL(SQL_DELETE_RECORD);
 		db.execSQL(SQL_DELETE_WAREHOUSE);
+		db.execSQL(SQL_DELETE_ENTRY);
 		onCreate(db);
 	}
 	

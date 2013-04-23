@@ -9,8 +9,8 @@ import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.ListFragment;
@@ -25,14 +25,14 @@ import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.SimpleAdapter;
 
-import com.android.app.warehousemanagement.db.InnerDBExec;
-import com.android.app.warehousemanagement.db.InnerDBTable;
+import com.android.app.warehousemanagement.db.OutterDBExec.OutterDBException;
+import com.android.app.warehousemanagement.db.SqlDBInterface;
+import com.android.app.warehousemanagement.db.SqlDBTable;
 
 public class RecordFragment extends ListFragment 
 							implements View.OnClickListener, SearchView.OnQueryTextListener{
 	
-	
-	private InnerDBExec db = null;
+	private SqlDBInterface db = null;
 	private SimpleAdapter mAdapter = null;
 	private String sortBy = "";
 	private String keyword = "";
@@ -41,13 +41,13 @@ public class RecordFragment extends ListFragment
 	private InputMethodManager inputManager = null;
 	private ArrayList<HashMap<String, Object>> list = new ArrayList<HashMap<String, Object>>();
 	private String[] fromColumns = new String[] {
-    		InnerDBTable.Record.COLUMN_NAME_DATE,
-    		InnerDBTable.Record.COLUMN_NAME_INOROUT,
-    		InnerDBTable.Record.COLUMN_NAME_AMOUNT,
-    		InnerDBTable.Record.COLUMN_NAME_UNIT,
-    		InnerDBTable.Record.COLUMN_NAME_ENTRY_TYPE,
-    		InnerDBTable.Record.COLUMN_NAME_STATUS,
-    		InnerDBTable.Record.COLUMN_NAME_ENTRY_NAME
+    		SqlDBTable.Record.COLUMN_NAME_DATE,
+    		SqlDBTable.Record.COLUMN_NAME_INOROUT,
+    		SqlDBTable.Record.COLUMN_NAME_AMOUNT,
+    		SqlDBTable.Entry.COLUMN_NAME_UNIT,
+    		SqlDBTable.Entry.COLUMN_NAME_TYPE,
+    		SqlDBTable.Record.COLUMN_NAME_STATUS,
+    		SqlDBTable.Entry.COLUMN_NAME_NAME
     };
 	private int[] toViews = new int[] {
     		R.id.recordDateTextView,
@@ -62,27 +62,16 @@ public class RecordFragment extends ListFragment
 	public static final class DatePickerFragment extends DialogFragment
 												 implements DatePickerDialog.OnDateSetListener{		
 		
-		private static InnerDBExec db = null;
-		private static SimpleAdapter mAdapter = null;
-		private static String date = "";
-		private static String keyword = "";
-		private static String sortBy = "";
-		private static ArrayList<HashMap<String, Object>> list = null;;
+		private static UpdateListingTask updateListingTask = null;
 		
-		public static DatePickerFragment newInstance(InnerDBExec _db, SimpleAdapter _mAdapter, ArrayList<HashMap<String, Object>> _list, String _keyword, String _sortBy, String _date, int year, int month, int day){
+		public static DatePickerFragment newInstance(UpdateListingTask _updateListingTask, int year, int month, int day){
 			DatePickerFragment dialog  = new DatePickerFragment();
-			 
-			db = _db;
-			mAdapter = _mAdapter;
-			list = _list;
-			keyword = _keyword;
-			sortBy = _sortBy;
-			date = _date;
+			
+			updateListingTask = _updateListingTask;
 			Bundle bundle = new Bundle();
 			bundle.putInt("year", year);
 			bundle.putInt("month", month);
 			bundle.putInt("day", day);
-			bundle.putString("date", date);
 	        dialog.setArguments(bundle);
 			return dialog;
 		}
@@ -114,26 +103,58 @@ public class RecordFragment extends ListFragment
 			else
 				strDay = "" + day;
 			
-			Cursor c = null;
 			if (getTag().equals(R.id.recordDateStartButton+"")){
 				Button dateStartButton = (Button)getActivity().findViewById(R.id.recordDateStartButton);
 				dateStartButton.setText(strYear+"-"+strMonth+"-"+strDay);
-				c = db.recordSearch(keyword, sortBy, strYear+strMonth+strDay, date);
 			}
 			else{
 				Button dateEndButton = (Button)getActivity().findViewById(R.id.recordDateEndButton);
 				dateEndButton.setText(strYear+"-"+strMonth+"-"+strDay);
-				c = db.recordSearch(keyword, sortBy, date, strYear+strMonth+strDay);
 			}
 			
-			updateCursor(list, c);
-			
-			mAdapter.notifyDataSetChanged();
+			updateListingTask.execute();
 		}
 
 	};
 	
-    @Override
+	private class UpdateListingTask extends AsyncTask<String, Integer, ArrayList<HashMap<String,Object>>>{
+
+		@Override
+		protected void onPreExecute(){
+			db.showWaiting(true, false);
+		}
+		
+	    @Override
+	    protected ArrayList<HashMap<String,Object>> doInBackground(String... params) {
+	    	ArrayList<HashMap<String,Object>> arrayList = new ArrayList<HashMap<String,Object>>();
+	    	try{
+		    	arrayList = db.recordSearch(keyword, sortBy, getButtonDate(R.id.recordDateStartButton), getButtonDate(R.id.recordDateEndButton));
+		    	publishProgress(100);
+	    	}
+	    	catch (OutterDBException e){
+	    		db.showExceptionDialog(e);
+	    	}
+	        return arrayList;
+	    }
+	    
+	    @Override  
+        protected void onProgressUpdate(Integer... progress) {  
+	    	db.setWaiting(progress[0]);
+            super.onProgressUpdate(progress);  
+        }  
+
+	    @Override
+	    protected void onPostExecute(ArrayList<HashMap<String,Object>> result) {
+	    	list.clear();
+	    	list.addAll(result);
+	    	mAdapter.notifyDataSetChanged();
+	    	
+	    	db.hideWaiting();
+	        super.onPostExecute(result);
+	    }
+	}
+	
+	@Override
     public void onCreate(Bundle savedInstanceState) {
     	ActionBar actionBar = getActivity().getActionBar();
 		actionBar.setDisplayShowCustomEnabled(false);
@@ -145,7 +166,7 @@ public class RecordFragment extends ListFragment
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
         Bundle savedInstanceState) {
     	//Stage1: set up database and adapter
-        db = new InnerDBExec(getActivity());
+    	db = new SqlDBInterface(getActivity());
         
         mAdapter= new SimpleAdapter(getActivity(),
         		list,
@@ -170,15 +191,15 @@ public class RecordFragment extends ListFragment
         if (!sortBy.equals("")){
         	Button currentButton = null;
         	String[] sortDetail = sortBy.split(" ");
-        	if (sortDetail[0].equals(InnerDBTable.Record.COLUMN_NAME_DATE))
+        	if (sortDetail[0].equals(SqlDBTable.Record.COLUMN_NAME_DATE))
         		currentButton = (Button)getView().findViewById(R.id.recordDateButton);
-        	else if (sortDetail[0].equals(InnerDBTable.Record.COLUMN_NAME_INOROUT))
+        	else if (sortDetail[0].equals(SqlDBTable.Record.COLUMN_NAME_INOROUT))
             	currentButton = (Button)getView().findViewById(R.id.recordInoroutButton);
-        	else if (sortDetail[0].equals(InnerDBTable.Record.COLUMN_NAME_ENTRY_TYPE))
+        	else if (sortDetail[0].equals(SqlDBTable.Entry.COLUMN_NAME_TYPE))
             	currentButton = (Button)getView().findViewById(R.id.recordTypeButton);
-        	else if (sortDetail[0].equals(InnerDBTable.Record.COLUMN_NAME_STATUS))
+        	else if (sortDetail[0].equals(SqlDBTable.Record.COLUMN_NAME_STATUS))
             	currentButton = (Button)getView().findViewById(R.id.recordStatusButton);
-        	else if (sortDetail[0].equals(InnerDBTable.Record.COLUMN_NAME_ENTRY_NAME))
+        	else if (sortDetail[0].equals(SqlDBTable.Entry.COLUMN_NAME_NAME))
             	currentButton = (Button)getView().findViewById(R.id.recordEntryButton);
         	
         	if (sortDetail.length == 2){
@@ -203,6 +224,9 @@ public class RecordFragment extends ListFragment
     	//Stage3: bind listener with the views
     	super.onResume();
     	
+    	UpdateListingTask updateListingTask = new UpdateListingTask();
+        updateListingTask.execute(keyword, sortBy, getButtonDate(R.id.recordDateStartButton), getButtonDate(R.id.recordDateEndButton));
+    	
     	SearchView searchView = (SearchView) getView().findViewById(R.id.recordSearchBar);
         searchView.setOnQueryTextListener(this);
         
@@ -223,9 +247,6 @@ public class RecordFragment extends ListFragment
         recordDateEndButton.setOnClickListener(this);
         
         inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-    	
-    	updateCursor(list, db.recordSearch(keyword, sortBy, getButtonDate(R.id.recordDateStartButton), getButtonDate(R.id.recordDateEndButton)));
-    	mAdapter.notifyDataSetChanged();
     }
     
     
@@ -239,60 +260,19 @@ public class RecordFragment extends ListFragment
     	endDate = ((Button)getView().findViewById(R.id.recordDateEndButton)).getText().toString();
     }
     
-    public final static void updateCursor(ArrayList<HashMap<String, Object>> list, Cursor c){
-  		list.clear();
-  		
-  		c.moveToFirst();
-  		for(int i=0;i<c.getCount();i++)     
-  		{     
-  			HashMap<String, Object> map = new HashMap<String, Object>();
-  			map.put(InnerDBTable.Record.COLUMN_NAME_RECORD_ID, c.getString(0));
-  			map.put(InnerDBTable.Record.COLUMN_NAME_ENTRY_NAME, c.getString(1));  
-  			if (c.getString(2).equals("产品")){
-  				map.put(InnerDBTable.Record.COLUMN_NAME_ENTRY_TYPE, R.drawable.icon_product); 
-  			}
-  			else {
-  				map.put(InnerDBTable.Record.COLUMN_NAME_ENTRY_TYPE, R.drawable.icon_material); 
-  			}
-  			map.put(InnerDBTable.Record.COLUMN_NAME_AMOUNT, c.getString(4));
-  			map.put(InnerDBTable.Record.COLUMN_NAME_UNIT, c.getString(5));
-  			if (c.getString(6).equals("入库")){
-  				map.put(InnerDBTable.Record.COLUMN_NAME_INOROUT, R.drawable.icon_instock);
-  			}
-  			else{
-  				map.put(InnerDBTable.Record.COLUMN_NAME_INOROUT, R.drawable.icon_outstock);
-  			}
-  			if (c.getString(7).equals("通过")){
-  				map.put(InnerDBTable.Record.COLUMN_NAME_STATUS, R.drawable.icon_pass);
-  			}
-  			else{
-  				map.put(InnerDBTable.Record.COLUMN_NAME_STATUS, R.drawable.icon_pending);
-  			}
-  			map.put(InnerDBTable.Record.COLUMN_NAME_DATE, c.getString(9));
-  			
-  			list.add(map);    
-  			c.moveToNext();
-  		}
-  		
-  	}
-    
-    
     @Override
     public void onClick(View v){
     	int buttonId = v.getId();
     	
     	if (buttonId == R.id.recordDateStartButton || buttonId == R.id.recordDateEndButton){
     		Button button = (Button) v;
-    		String strDate = "";
     		String tag = "";
     		
     		switch (button.getId()){
     		case R.id.recordDateStartButton:
-    			strDate = getButtonDate(R.id.recordDateEndButton);
     			tag = R.id.recordDateStartButton + "";
     			break;
     		case R.id.recordDateEndButton:
-    			strDate = getButtonDate(R.id.recordDateStartButton);
     			tag = R.id.recordDateEndButton + "";
     			break;
     		}
@@ -312,7 +292,7 @@ public class RecordFragment extends ListFragment
 				month = Integer.parseInt(date[1]) - 1;
 				day = Integer.parseInt(date[2]);
 			}
-			DatePickerFragment datePicker = DatePickerFragment.newInstance(db, mAdapter, list, keyword, sortBy, strDate, year, month, day);
+			DatePickerFragment datePicker = DatePickerFragment.newInstance(new UpdateListingTask(), year, month, day);
 			datePicker.show(getActivity().getSupportFragmentManager(), tag);
     	}
     	else {
@@ -342,23 +322,23 @@ public class RecordFragment extends ListFragment
 	    	
 	    	switch (buttonId){
 	    	case R.id.recordDateButton:
-	    		sortColumn = InnerDBTable.Record.COLUMN_NAME_DATE;
+	    		sortColumn = SqlDBTable.Record.COLUMN_NAME_DATE;
 	    		currentButton = recordDateButton;
 	    		break;
 	    	case R.id.recordTypeButton:
-	    		sortColumn = InnerDBTable.Record.COLUMN_NAME_ENTRY_TYPE;
+	    		sortColumn = SqlDBTable.Entry.COLUMN_NAME_TYPE;
 	    		currentButton = recordTypeButton;
 	    		break;
 	    	case R.id.recordEntryButton:
-	    		sortColumn = InnerDBTable.Record.COLUMN_NAME_ENTRY_NAME;
+	    		sortColumn = SqlDBTable.Entry.COLUMN_NAME_NAME;
 	    		currentButton = recordEntryButton;
 	    		break;
 	    	case R.id.recordInoroutButton:
-	    		sortColumn = InnerDBTable.Record.COLUMN_NAME_INOROUT;
+	    		sortColumn = SqlDBTable.Record.COLUMN_NAME_INOROUT;
 	    		currentButton = recordInoroutButton;
 	    		break;
 	    	case R.id.recordStatusButton:
-	    		sortColumn = InnerDBTable.Record.COLUMN_NAME_STATUS;
+	    		sortColumn = SqlDBTable.Record.COLUMN_NAME_STATUS;
 	    		currentButton = recordStatusButton;
 	    		break;	
 	    	}
@@ -382,8 +362,9 @@ public class RecordFragment extends ListFragment
 	    		currentButton.setTextColor(Color.rgb(102, 153, 0));
 	    	}
 	    	
-	    	updateCursor(list, db.recordSearch(keyword, sortBy, getButtonDate(R.id.recordDateStartButton), getButtonDate(R.id.recordDateEndButton)));
-	    	mAdapter.notifyDataSetChanged();
+	    	UpdateListingTask updateListingTask = new UpdateListingTask();
+	        updateListingTask.execute(keyword, sortBy, getButtonDate(R.id.recordDateStartButton), getButtonDate(R.id.recordDateEndButton));
+	    	
     	}
     }
     
@@ -400,14 +381,19 @@ public class RecordFragment extends ListFragment
 	@Override
 	public boolean onQueryTextChange(String str) {
 		keyword = str;
-		updateCursor(list, db.recordSearch(keyword, sortBy, getButtonDate(R.id.recordDateStartButton), getButtonDate(R.id.recordDateEndButton)));
-    	mAdapter.notifyDataSetChanged();
+		if (str == null || str.equals("")){
+			UpdateListingTask updateListingTask = new UpdateListingTask();
+	        updateListingTask.execute(keyword, sortBy, getButtonDate(R.id.recordDateStartButton), getButtonDate(R.id.recordDateEndButton));
+		}
     	
 		return false;
 	}
 	
 	@Override
 	public boolean onQueryTextSubmit(String str) {
+		keyword = str;
+		UpdateListingTask updateListingTask = new UpdateListingTask();
+        updateListingTask.execute(keyword, sortBy, getButtonDate(R.id.recordDateStartButton), getButtonDate(R.id.recordDateEndButton));
 		inputManager.hideSoftInputFromWindow(
                 getActivity().getCurrentFocus().getWindowToken(),
                 InputMethodManager.HIDE_NOT_ALWAYS); 
@@ -423,7 +409,7 @@ public class RecordFragment extends ListFragment
 		HashMap<String,Object> hashMap = (HashMap<String,Object>)listView.getItemAtPosition(position);
 		
 		Intent intent = new Intent(getActivity(), SingleRecordActivity.class);
-		intent.putExtra("id", (String)hashMap.get(InnerDBTable.Record.COLUMN_NAME_RECORD_ID));
+		intent.putExtra("id", Integer.parseInt(hashMap.get(SqlDBTable.Record.COLUMN_NAME_ID).toString()));
 		startActivity(intent);
 	}
 }

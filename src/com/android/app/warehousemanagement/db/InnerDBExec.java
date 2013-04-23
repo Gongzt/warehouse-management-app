@@ -1,6 +1,10 @@
 package com.android.app.warehousemanagement.db;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
+
+import com.android.app.warehousemanagement.R;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -16,199 +20,155 @@ public class InnerDBExec{
 		dbHelper = new InnerDB(context);
 	}
 	
-	//search the product(material) name containing the keyword
-	//return order: entryname
-	public String[] currentSearchName(String keyword){
+	/* Select all the entry information
+	 * INPUT: N/A 
+	 * OUTPUT: entry.Name, entry.Type entry.Unit
+	 *		   IN ArrayList<HashMap<String, Object>> 
+	 */ 
+	public ArrayList<HashMap<String, Object>> entrySelectAll(){
 		
 		SQLiteDatabase readableDB = dbHelper.getReadableDatabase();
 		
 		String[] projection = {
-				InnerDBTable.Current.COLUMN_NAME_ENTRY_NAME, 
+			SqlDBTable.Entry.COLUMN_NAME_ID,
+			SqlDBTable.Entry.COLUMN_NAME_NAME,
+			SqlDBTable.Entry.COLUMN_NAME_TYPE,
+			SqlDBTable.Entry.COLUMN_NAME_UNIT,
 		};
-		String selection = InnerDBTable.Current.COLUMN_NAME_ENTRY_NAME + " LIKE ?";
-		String[] selectionArgs = {"%"+keyword+"%"};
-		String groupBy = InnerDBTable.Current.COLUMN_NAME_ENTRY_NAME;
+		String selection = null;
+		String[] selectionArgs = null;
+		String groupBy = null;
 		String having = null;
 		String orderBy = null;
 		String limit = null;
 		
-		Cursor c = readableDB.query(InnerDBTable.Current.TABLE_NAME, projection, selection, selectionArgs, groupBy, having, orderBy, limit);
+		Cursor c = readableDB.query(SqlDBTable.Entry.TABLE_NAME, projection, selection, selectionArgs, groupBy, having, orderBy, limit);
 		
-		String[] result = new String[c.getCount()];
+		ArrayList<HashMap<String, Object>> arrayList = new ArrayList<HashMap<String, Object>>();
 		c.moveToFirst();
 		for (int i = 0; i<c.getCount(); i++){
-			result[i] = c.getString(0);
+			HashMap<String, Object> map = new HashMap<String, Object>();
+			map.put(SqlDBTable.Entry.COLUMN_NAME_ID, c.getInt(0));
+			map.put(SqlDBTable.Entry.COLUMN_NAME_NAME, c.getString(1));
+			map.put(SqlDBTable.Entry.COLUMN_NAME_TYPE, R.drawable.icon_material);
+			map.put(SqlDBTable.Entry.COLUMN_NAME_TYPE, R.drawable.icon_product);
+			map.put(SqlDBTable.Entry.COLUMN_NAME_UNIT, c.getString(3));
+			
+			arrayList.add(map);
 			c.moveToNext();
 		}
 
 		readableDB.close();
-		return result;
+		return arrayList;
 	}
-	
-	public String[] currentSelectTotal(String name, String type){
+		
+	/* Select all the current entry inside the warehouse with specific name and type
+	 * INPUT: String name - entry name
+	 * 		  int type - entry type
+	 * OUTPUT: entry._id, current.Amount, warehouse.Warehouse_Name, entry.Unit
+	 *         IN ArrayList<HashMap<String, Object>>
+	 */
+	public ArrayList<HashMap<String, Object>> currentSelectByNameAndType(String name, int type){
 
 		SQLiteDatabase readableDB = dbHelper.getReadableDatabase();
 		
 		String[] projection = {
-				"SUM(" + InnerDBTable.Current.COLUMN_NAME_AMOUNT + ") AS " + InnerDBTable.Current.COLUMN_NAME_AMOUNT, 
-				InnerDBTable.Current.COLUMN_NAME_UNIT
+				SqlDBTable.Current.COLUMN_NAME_ENTRY_ID,
+				SqlDBTable.Current.COLUMN_NAME_AMOUNT,
+				SqlDBTable.Warehouse.COLUMN_NAME_NAME,
+				SqlDBTable.Entry.COLUMN_NAME_UNIT
 		};
-		String selection = InnerDBTable.Current.COLUMN_NAME_ENTRY_NAME + " = ? AND "+ InnerDBTable.Current.COLUMN_NAME_ENTRY_TYPE + "= ?";
-		String[] selectionArgs = {name, type};
-		String groupBy = null;
-		String having = null;
-		String orderBy = InnerDBTable.Current.COLUMN_NAME_ENTRY_NAME + " , " + InnerDBTable.Current.COLUMN_NAME_ENTRY_TYPE;
-		String limit = null;
-		
-		Cursor c = readableDB.query(InnerDBTable.Current.TABLE_NAME, projection, selection, selectionArgs, groupBy, having, orderBy, limit);
-		
-		c.moveToFirst();
-		String[] result = new String[2];
-		result[0] = c.getString(0);
-		result[1] = c.getString(1);
-		
-		readableDB.close();
-		
-		return result;
-	}
-	
-	public Cursor currentSelectByNameAndType(String name, String type){
-
-		SQLiteDatabase readableDB = dbHelper.getReadableDatabase();
-		
-		String[] projection = {
-				InnerDBTable.Current.COLUMN_NAME_AMOUNT,
-				InnerDBTable.Current.COLUMN_NAME_UNIT,
-				InnerDBTable.Current.COLUMN_NAME_WAREHOUSE
-		};
-		String selection = InnerDBTable.Current.COLUMN_NAME_ENTRY_NAME + " = ? AND "+ InnerDBTable.Current.COLUMN_NAME_ENTRY_TYPE + "= ?";
-		String[] selectionArgs = {name, type};
-		String groupBy = null;
-		String having = null;
-		String orderBy = null;
-		String limit = null;
-		
-		Cursor c = readableDB.query(InnerDBTable.Current.TABLE_NAME, projection, selection, selectionArgs, groupBy, having, orderBy, limit);
-		
-		c.moveToFirst();
-		readableDB.close();
-		return c;
-	}
-	
-	public String[] currentSelectByName(String name){
-		
-		SQLiteDatabase readableDB = dbHelper.getReadableDatabase();
-		
-		String[] projection = {
-				InnerDBTable.Current.COLUMN_NAME_ENTRY_TYPE,
-				InnerDBTable.Current.COLUMN_NAME_UNIT,
-		};
-		String selection = InnerDBTable.Current.COLUMN_NAME_ENTRY_NAME + " = ?";
+		String table = "(" + SqlDBTable.Current.TABLE_NAME + " LEFT JOIN " + SqlDBTable.Entry.TABLE_NAME + " ON " +
+						SqlDBTable.Current.TABLE_NAME + "." + SqlDBTable.Current.COLUMN_NAME_ENTRY_ID + "=" + 
+						SqlDBTable.Entry.TABLE_NAME + "." + SqlDBTable.Entry.COLUMN_NAME_ID+ ")" +
+						" LEFT JOIN " + SqlDBTable.Warehouse.TABLE_NAME + " ON " + 
+						SqlDBTable.Current.TABLE_NAME + "." + SqlDBTable.Current.COLUMN_NAME_WAREHOUSE_ID + "=" + 
+						SqlDBTable.Warehouse.TABLE_NAME + "." + SqlDBTable.Warehouse.COLUMN_NAME_ID;
+		String selection = SqlDBTable.Entry.COLUMN_NAME_NAME + " = ? AND "+ SqlDBTable.Entry.COLUMN_NAME_TYPE + "= " + type;
 		String[] selectionArgs = {name};
-		String groupBy = InnerDBTable.Current.COLUMN_NAME_ENTRY_NAME;
+		String groupBy = null;
 		String having = null;
 		String orderBy = null;
 		String limit = null;
 		
-		Cursor c = readableDB.query(InnerDBTable.Current.TABLE_NAME, projection, selection, selectionArgs, groupBy, having, orderBy, limit);
-		
-		String[] result = new String[2];
+		Cursor c = readableDB.query(table, projection, selection, selectionArgs, groupBy, having, orderBy, limit);
 		c.moveToFirst();
-		result[0] = c.getString(0);
-		result[1] = c.getString(1);
-
+		
+		ArrayList<HashMap<String, Object>> arrayList = new ArrayList<HashMap<String, Object>>();
+		c.moveToFirst();
+		for (int i = 0; i<c.getCount(); i++){
+			HashMap<String, Object> map = new HashMap<String, Object>();
+			map.put(SqlDBTable.Current.COLUMN_NAME_ENTRY_ID, c.getInt(0));
+			map.put(SqlDBTable.Current.COLUMN_NAME_AMOUNT, c.getInt(1));
+			map.put(SqlDBTable.Warehouse.COLUMN_NAME_NAME, c.getString(2));
+			map.put(SqlDBTable.Entry.COLUMN_NAME_UNIT, c.getString(3));
+			
+			arrayList.add(map);
+			c.moveToNext();
+		}
+		
 		readableDB.close();
-		return result;
+		return arrayList;
 	}
 	
-	//search the product(material) relative to the keyword
-	//return order: entryid, entryname, type, amount
-	public Cursor currentSearch(String keyword, String sortBy){
+	/* Search the entry in current warehouse with specific keyword sorted in the specific order
+	 * INPUT: String keyword - entry name the may containing this keyword
+	 * 	      String sortby - sort in specific order
+	 * OUTPUT: current._id, entry.Name, entry.Type, entry.Unit, SUM(current.Amount)
+	 *         IN ArrayList<HashMap<String, Object>>
+	 */
+	public ArrayList<HashMap<String, Object>> currentSearch(String keyword, String sortBy){
 		SQLiteDatabase readableDB = dbHelper.getReadableDatabase();
 
 		String[] projection = {
-				InnerDBTable.Current.COLUMN_NAME_ENTRY_ID,
-				InnerDBTable.Current.COLUMN_NAME_ENTRY_NAME,
-				InnerDBTable.Current.COLUMN_NAME_ENTRY_TYPE,
-				InnerDBTable.Current.COLUMN_NAME_UNIT,
-				"SUM(" + InnerDBTable.Current.COLUMN_NAME_AMOUNT + ") AS " + InnerDBTable.Current.COLUMN_NAME_AMOUNT 
+				SqlDBTable.Current.TABLE_NAME + "." + SqlDBTable.Current.COLUMN_NAME_ID,
+				SqlDBTable.Entry.COLUMN_NAME_NAME,
+				SqlDBTable.Entry.COLUMN_NAME_TYPE,
+				SqlDBTable.Entry.COLUMN_NAME_UNIT,
+				"SUM(" + SqlDBTable.Current.COLUMN_NAME_AMOUNT + ") AS " + SqlDBTable.Current.COLUMN_NAME_AMOUNT 
 		};
-		String selection = 
-				InnerDBTable.Current.COLUMN_NAME_ENTRY_NAME + " LIKE ? OR " +
-				InnerDBTable.Current.COLUMN_NAME_ENTRY_TYPE + " LIKE ? OR " +
-				InnerDBTable.Current.COLUMN_NAME_WAREHOUSE + " LIKE ?";
-		String[] selectionArgs = {"%"+keyword+"%", "%"+keyword+"%", "%"+keyword+"%"};
-		String groupBy = InnerDBTable.Current.COLUMN_NAME_ENTRY_NAME + " , " + InnerDBTable.Current.COLUMN_NAME_ENTRY_TYPE;
+		String table = SqlDBTable.Current.TABLE_NAME + " LEFT JOIN " + SqlDBTable.Entry.TABLE_NAME + " ON " +
+				SqlDBTable.Current.TABLE_NAME + "." + SqlDBTable.Current.COLUMN_NAME_ENTRY_ID + "=" + 
+				SqlDBTable.Entry.TABLE_NAME + "." + SqlDBTable.Entry.COLUMN_NAME_ID;
+		String selection = SqlDBTable.Entry.COLUMN_NAME_NAME + " LIKE ?";
+		String[] selectionArgs = {"%"+keyword+"%"};
+		String groupBy = SqlDBTable.Current.COLUMN_NAME_ENTRY_ID;
 		String having = null;
 		String orderBy = sortBy;
 		String limit = null;
 
-		Cursor c = readableDB.query(InnerDBTable.Current.TABLE_NAME, projection, selection, selectionArgs, groupBy, having, orderBy, limit);
+		Cursor c = readableDB.query(table, projection, selection, selectionArgs, groupBy, having, orderBy, limit);
 		c.moveToFirst();
+		
+		ArrayList<HashMap<String, Object>> arrayList = new ArrayList<HashMap<String, Object>>();
+		c.moveToFirst();
+		for (int i = 0; i<c.getCount(); i++){ 
+			HashMap<String, Object> map = new HashMap<String, Object>();
+			map.put(SqlDBTable.Entry.COLUMN_NAME_ID, c.getInt(0));
+			map.put(SqlDBTable.Entry.COLUMN_NAME_NAME, c.getString(1));
+			if (c.getInt(2) == 0) 
+				map.put(SqlDBTable.Entry.COLUMN_NAME_TYPE, R.drawable.icon_material);
+			else
+				map.put(SqlDBTable.Entry.COLUMN_NAME_TYPE, R.drawable.icon_product);
+			map.put(SqlDBTable.Entry.COLUMN_NAME_UNIT, c.getString(3));
+			map.put(SqlDBTable.Current.COLUMN_NAME_AMOUNT, c.getInt(4));
+			
+			arrayList.add(map);
+			c.moveToNext();
+		}
+		
 		readableDB.close();
-		return c;
+		return arrayList;
 	}
 	
-	//update the product(material) amount, if product(material) not exist, insert it
-	public long currentUpdate (String name, String type, String warehouse, int change, String unit) {
-		
-		SQLiteDatabase readableDB = dbHelper.getReadableDatabase();
-		
-		String[] projection = {
-				InnerDBTable.Current.COLUMN_NAME_ENTRY_ID,
-				InnerDBTable.Current.COLUMN_NAME_ENTRY_NAME,
-				InnerDBTable.Current.COLUMN_NAME_AMOUNT
-		};
-		String selection = 
-				InnerDBTable.Current.COLUMN_NAME_ENTRY_NAME + " = ? AND " +
-				InnerDBTable.Current.COLUMN_NAME_ENTRY_TYPE + " = ? AND " +
-				InnerDBTable.Current.COLUMN_NAME_WAREHOUSE + " = ?";
-		String[] selectionArgs = {name, type, warehouse};
-		String groupBy = null;
-		String having = null;
-		String orderBy = null;
-		String limit = null;
-		
-		Cursor c = readableDB.query(InnerDBTable.Current.TABLE_NAME, projection, selection, selectionArgs, groupBy, having, orderBy, limit);
-		long id = c.getCount();
-		int amount = 0;
-		if (id>0) {
-			c.moveToFirst();
-			id = c.getLong(0);
-			amount = c.getInt(2);
-		}
-		else {
-			id = -1;
-		}
-		readableDB.close();
-		
-		SQLiteDatabase writableDB = dbHelper.getWritableDatabase();
-		
-		
-		if (id == -1){
-			ContentValues values = new ContentValues();
-			values.put(InnerDBTable.Current.COLUMN_NAME_ENTRY_NAME, name);
-			values.put(InnerDBTable.Current.COLUMN_NAME_ENTRY_TYPE, type);
-			values.put(InnerDBTable.Current.COLUMN_NAME_WAREHOUSE, warehouse);
-			values.put(InnerDBTable.Current.COLUMN_NAME_AMOUNT, amount+change);
-			values.put(InnerDBTable.Current.COLUMN_NAME_UNIT, unit);
-			
-			writableDB.insert(InnerDBTable.Current.TABLE_NAME, "null", values);
-		}
-		else {
-			ContentValues values = new ContentValues();
-			values.put(InnerDBTable.Current.COLUMN_NAME_AMOUNT, amount+change);
-			
-			writableDB.update(InnerDBTable.Current.TABLE_NAME, values, selection, selectionArgs);
-			
-		}
-		
-		return id;
-	}
-	
-	//search the record relative to the keyword
-	//return order: recordid, entryname, type, warehouse, amount, inorout, status, remark, date
-	public Cursor recordSearch(String keyword, String sortBy, String startDate, String endDate){
+	/* Search record in specific keyword between an interval of date sorted in specific order
+	 * INPUT: String keyword - search name, warehouse and remark that may containing keyword
+	 *        String sortBy - sort the list of output in specific order
+	 *        String startDate, endDate - the interval of the date
+	 * OUTPUT:  record._id, entry.Name, entry.Type,  record.Amount, entry.Unit, record.InOrOut, record.Status, record.Date
+	 *          IN ArrayList<HashMap<String, Object>>
+	 */
+	public ArrayList<HashMap<String, Object>> recordSearch(String keyword, String sortBy, String startDate, String endDate){
 		if (startDate.equals("")){
 			startDate = "190001010000";
 		}
@@ -222,185 +182,390 @@ public class InnerDBExec{
 		SQLiteDatabase readableDB = dbHelper.getReadableDatabase();
 		
 		String[] projection = {
-				InnerDBTable.Record.COLUMN_NAME_RECORD_ID,
-				InnerDBTable.Record.COLUMN_NAME_ENTRY_NAME,
-				InnerDBTable.Record.COLUMN_NAME_ENTRY_TYPE,
-				InnerDBTable.Record.COLUMN_NAME_WAREHOUSE,
-				InnerDBTable.Record.COLUMN_NAME_AMOUNT,
-				InnerDBTable.Record.COLUMN_NAME_UNIT,
-				InnerDBTable.Record.COLUMN_NAME_INOROUT,
-				InnerDBTable.Record.COLUMN_NAME_STATUS,
-				InnerDBTable.Record.COLUMN_NAME_REMARK,
-				"SUBSTR("+InnerDBTable.Record.COLUMN_NAME_DATE+",1,4) || '-' || " +
-				"SUBSTR("+InnerDBTable.Record.COLUMN_NAME_DATE+",5,2) || '-' || " +
-				"SUBSTR("+InnerDBTable.Record.COLUMN_NAME_DATE+",7,2) || ' ' || " +
-				"SUBSTR("+InnerDBTable.Record.COLUMN_NAME_DATE+",9,2) || ':' || " +
-				"SUBSTR("+InnerDBTable.Record.COLUMN_NAME_DATE+",11,2) AS " + InnerDBTable.Record.COLUMN_NAME_DATE 
+				SqlDBTable.Record.TABLE_NAME + "." + SqlDBTable.Record.COLUMN_NAME_ID,
+				SqlDBTable.Entry.COLUMN_NAME_NAME,
+				SqlDBTable.Entry.COLUMN_NAME_TYPE,
+				SqlDBTable.Record.COLUMN_NAME_AMOUNT,
+				SqlDBTable.Entry.COLUMN_NAME_UNIT,
+				SqlDBTable.Record.COLUMN_NAME_INOROUT,
+				SqlDBTable.Record.COLUMN_NAME_STATUS,
+				"SUBSTR("+SqlDBTable.Record.COLUMN_NAME_DATE+",1,4) || '-' || " +
+				"SUBSTR("+SqlDBTable.Record.COLUMN_NAME_DATE+",5,2) || '-' || " +
+				"SUBSTR("+SqlDBTable.Record.COLUMN_NAME_DATE+",7,2) || ' ' || " +
+				"SUBSTR("+SqlDBTable.Record.COLUMN_NAME_DATE+",9,2) || ':' || " +
+				"SUBSTR("+SqlDBTable.Record.COLUMN_NAME_DATE+",11,2) AS " + SqlDBTable.Record.COLUMN_NAME_DATE 
 		};
-		String selection = "(" + InnerDBTable.Record.COLUMN_NAME_ENTRY_NAME + " LIKE ? OR " +
-				InnerDBTable.Record.COLUMN_NAME_ENTRY_TYPE + " LIKE ? OR " +
-				InnerDBTable.Record.COLUMN_NAME_REMARK + " LIKE ? OR " +
-				InnerDBTable.Record.COLUMN_NAME_STATUS + " LIKE ? OR " +
-				InnerDBTable.Record.COLUMN_NAME_WAREHOUSE + " LIKE ? OR " +
-				InnerDBTable.Record.COLUMN_NAME_INOROUT + " LIKE ? ) AND " + 
-				InnerDBTable.Record.COLUMN_NAME_DATE + " > ? AND " +
-				InnerDBTable.Record.COLUMN_NAME_DATE + " < ?";
-		String[] selectionArgs = {"%"+keyword+"%", "%"+keyword+"%", "%"+keyword+"%", "%"+keyword+"%", "%"+keyword+"%", "%"+keyword+"%", startDate, endDate};
+		String table = "(" + SqlDBTable.Record.TABLE_NAME + " LEFT JOIN " + SqlDBTable.Entry.TABLE_NAME + " ON " +
+				SqlDBTable.Record.TABLE_NAME + "." + SqlDBTable.Record.COLUMN_NAME_ENTRY_ID + "=" + 
+				SqlDBTable.Entry.TABLE_NAME + "." + SqlDBTable.Entry.COLUMN_NAME_ID+ ")" +
+				" LEFT JOIN " + SqlDBTable.Warehouse.TABLE_NAME + " ON " + 
+				SqlDBTable.Record.TABLE_NAME + "." + SqlDBTable.Record.COLUMN_NAME_WAREHOUSE_ID + "=" + 
+				SqlDBTable.Warehouse.TABLE_NAME + "." + SqlDBTable.Warehouse.COLUMN_NAME_ID;
+		String selection = "(" + SqlDBTable.Entry.COLUMN_NAME_NAME + " LIKE ? OR " +
+				SqlDBTable.Record.COLUMN_NAME_REMARK + " LIKE ? OR " +
+				SqlDBTable.Warehouse.COLUMN_NAME_NAME + " LIKE ?) AND " + 
+				SqlDBTable.Record.COLUMN_NAME_DATE + " > ? AND " +
+				SqlDBTable.Record.COLUMN_NAME_DATE + " < ?";
+		String[] selectionArgs = {"%"+keyword+"%", "%"+keyword+"%", "%"+keyword+"%", startDate, endDate};
 		String groupBy = null;
 		String having = null;
 		String orderBy = null;
 		if (sortBy.equals(""))
-			orderBy = InnerDBTable.Record.COLUMN_NAME_DATE + " DESC";
+			orderBy = SqlDBTable.Record.COLUMN_NAME_DATE + " DESC";
 		else
-			orderBy = sortBy + " , " + InnerDBTable.Record.COLUMN_NAME_DATE + " DESC";
+			orderBy = sortBy + " , " + SqlDBTable.Record.COLUMN_NAME_DATE + " DESC";
 		String limit = null;
 		
-		Cursor c = readableDB.query(InnerDBTable.Record.TABLE_NAME, projection, selection, selectionArgs, groupBy, having, orderBy, limit);
+		Cursor c = readableDB.query(table, projection, selection, selectionArgs, groupBy, having, orderBy, limit);
 		c.moveToFirst();
 
+		ArrayList<HashMap<String, Object>> arrayList = new ArrayList<HashMap<String, Object>>();
+		c.moveToFirst();
+		
+		for (int i = 0; i<c.getCount(); i++){ 
+			HashMap<String, Object> map = new HashMap<String, Object>();
+			map.put(SqlDBTable.Record.COLUMN_NAME_ID, c.getInt(0));
+			map.put(SqlDBTable.Entry.COLUMN_NAME_NAME, c.getString(1));
+			if (c.getInt(2) == 0)
+				map.put(SqlDBTable.Entry.COLUMN_NAME_TYPE, R.drawable.icon_material);
+			else
+				map.put(SqlDBTable.Entry.COLUMN_NAME_TYPE, R.drawable.icon_product);
+			map.put(SqlDBTable.Record.COLUMN_NAME_AMOUNT, c.getInt(3));
+			map.put(SqlDBTable.Entry.COLUMN_NAME_UNIT, c.getString(4));
+			if (c.getInt(5) == 0)
+				map.put(SqlDBTable.Record.COLUMN_NAME_INOROUT, R.drawable.icon_instock);
+			else
+				map.put(SqlDBTable.Record.COLUMN_NAME_INOROUT, R.drawable.icon_outstock);
+			if (c.getInt(6) == 0)
+				map.put(SqlDBTable.Record.COLUMN_NAME_STATUS, R.drawable.icon_pending);
+			else
+				map.put(SqlDBTable.Record.COLUMN_NAME_STATUS, R.drawable.icon_pass);
+			map.put(SqlDBTable.Record.COLUMN_NAME_DATE, c.getString(7));
+			
+			
+			arrayList.add(map);
+			c.moveToNext();
+		}
+		
 		readableDB.close();
-		return c;
+		return arrayList;
 	}
 	
-	public Cursor recordSelectById (String id){
+	/* Select record with specific ID
+	 * INPUT: int id - the id of the record
+	 * OUTPUT: record._id, entry.Name, entry.Type, warehouse.Warehouse_Name, record.Amount, entry.Unit, record.InOrOut,
+	 *         record.Status, record.Remark, record.Date
+	 *         IN HashMap<String, Object>
+	 */
+	public HashMap<String, Object> recordSelectById (int id){
 
 		SQLiteDatabase readableDB = dbHelper.getReadableDatabase();
 		
 		String[] projection = {
-				InnerDBTable.Record.COLUMN_NAME_RECORD_ID,
-				InnerDBTable.Record.COLUMN_NAME_ENTRY_NAME,
-				InnerDBTable.Record.COLUMN_NAME_ENTRY_TYPE,
-				InnerDBTable.Record.COLUMN_NAME_WAREHOUSE,
-				InnerDBTable.Record.COLUMN_NAME_AMOUNT,
-				InnerDBTable.Record.COLUMN_NAME_UNIT,
-				InnerDBTable.Record.COLUMN_NAME_INOROUT,
-				InnerDBTable.Record.COLUMN_NAME_STATUS,
-				InnerDBTable.Record.COLUMN_NAME_REMARK,
-				"SUBSTR("+InnerDBTable.Record.COLUMN_NAME_DATE+",1,4) || '-' || " +
-				"SUBSTR("+InnerDBTable.Record.COLUMN_NAME_DATE+",5,2) || '-' || " +
-				"SUBSTR("+InnerDBTable.Record.COLUMN_NAME_DATE+",7,2) || ' ' || " +
-				"SUBSTR("+InnerDBTable.Record.COLUMN_NAME_DATE+",9,2) || ':' || " +
-				"SUBSTR("+InnerDBTable.Record.COLUMN_NAME_DATE+",11,2) AS " + InnerDBTable.Record.COLUMN_NAME_DATE 
+				SqlDBTable.Record.TABLE_NAME + "." + SqlDBTable.Record.COLUMN_NAME_ID,
+				SqlDBTable.Entry.COLUMN_NAME_NAME,
+				SqlDBTable.Entry.COLUMN_NAME_TYPE,
+				SqlDBTable.Warehouse.COLUMN_NAME_NAME,
+				SqlDBTable.Record.COLUMN_NAME_AMOUNT,
+				SqlDBTable.Entry.COLUMN_NAME_UNIT,
+				SqlDBTable.Record.COLUMN_NAME_INOROUT,
+				SqlDBTable.Record.COLUMN_NAME_STATUS,
+				SqlDBTable.Record.COLUMN_NAME_REMARK,
+				"SUBSTR("+SqlDBTable.Record.COLUMN_NAME_DATE+",1,4) || '-' || " +
+				"SUBSTR("+SqlDBTable.Record.COLUMN_NAME_DATE+",5,2) || '-' || " +
+				"SUBSTR("+SqlDBTable.Record.COLUMN_NAME_DATE+",7,2) || ' ' || " +
+				"SUBSTR("+SqlDBTable.Record.COLUMN_NAME_DATE+",9,2) || ':' || " +
+				"SUBSTR("+SqlDBTable.Record.COLUMN_NAME_DATE+",11,2) AS " + SqlDBTable.Record.COLUMN_NAME_DATE 
 		};
-		String selection = InnerDBTable.Record.COLUMN_NAME_RECORD_ID + " = ?";
-		String[] selectionArgs = {id};
+		String table = "(" + SqlDBTable.Record.TABLE_NAME + " LEFT JOIN " + SqlDBTable.Entry.TABLE_NAME + " ON " +
+				SqlDBTable.Record.TABLE_NAME + "." + SqlDBTable.Record.COLUMN_NAME_ENTRY_ID + "=" + 
+				SqlDBTable.Entry.TABLE_NAME + "." + SqlDBTable.Entry.COLUMN_NAME_ID+ ")" +
+				" LEFT JOIN " + SqlDBTable.Warehouse.TABLE_NAME + " ON " + 
+				SqlDBTable.Record.TABLE_NAME + "." + SqlDBTable.Record.COLUMN_NAME_WAREHOUSE_ID + "=" + 
+				SqlDBTable.Warehouse.TABLE_NAME + "." + SqlDBTable.Warehouse.COLUMN_NAME_ID;
+		String selection = SqlDBTable.Record.TABLE_NAME + "." + SqlDBTable.Record.COLUMN_NAME_ID + " = " + id;
+		String[] selectionArgs = {};
 		String groupBy = null;
 		String having = null;
 		String orderBy = null;
 		String limit = null;
 		
-		Cursor c = readableDB.query(InnerDBTable.Record.TABLE_NAME, projection, selection, selectionArgs, groupBy, having, orderBy, limit);
+		Cursor c = readableDB.query(table, projection, selection, selectionArgs, groupBy, having, orderBy, limit);
 		c.moveToFirst();
+		
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		c.moveToFirst();
+		
+		if (c.getCount() > 0){ 
+			
+			map.put(SqlDBTable.Record.COLUMN_NAME_ID, c.getInt(0));
+			map.put(SqlDBTable.Entry.COLUMN_NAME_NAME, c.getString(1));
+			map.put(SqlDBTable.Entry.COLUMN_NAME_TYPE, c.getInt(2));
+			map.put(SqlDBTable.Warehouse.COLUMN_NAME_NAME, c.getString(3));
+			map.put(SqlDBTable.Record.COLUMN_NAME_AMOUNT, c.getInt(4));
+			map.put(SqlDBTable.Entry.COLUMN_NAME_UNIT, c.getString(5));
+			map.put(SqlDBTable.Record.COLUMN_NAME_INOROUT, c.getInt(6));
+			map.put(SqlDBTable.Record.COLUMN_NAME_STATUS, c.getInt(7));
+			map.put(SqlDBTable.Record.COLUMN_NAME_REMARK, c.getString(8));
+			map.put(SqlDBTable.Record.COLUMN_NAME_DATE, c.getString(9));
+
+			c.moveToNext();
+		}
 
 		readableDB.close();
-		return c;
+		return map;
 	}
 	
-	public Cursor recordSelectByNameAndType (String name, String type, String sortby){
+	/* select record in specific name and type
+	 * INTPUT: String name - the specific name of the record
+	 *         int type - the specific type of the record
+	 *         String sortby - the listing order
+	 * OUTPUT: record._id, warehouse.Warehouse_Name, record.Amount, entry.Unit, record.InOrOut, record.Status, record.Date
+	 *         IN ArrayList<HashMap<String, Object>>
+	 */
+	public ArrayList<HashMap<String, Object>> recordSelectByNameAndType (String name, int type, String sortby){
 		
 		SQLiteDatabase readableDB = dbHelper.getReadableDatabase();
 		
 		String[] projection = {
-				InnerDBTable.Record.COLUMN_NAME_RECORD_ID,
-				InnerDBTable.Record.COLUMN_NAME_WAREHOUSE,
-				InnerDBTable.Record.COLUMN_NAME_AMOUNT,
-				InnerDBTable.Record.COLUMN_NAME_UNIT,
-				InnerDBTable.Record.COLUMN_NAME_INOROUT,
-				InnerDBTable.Record.COLUMN_NAME_STATUS,
-				"SUBSTR("+InnerDBTable.Record.COLUMN_NAME_DATE+",1,4) || '-' || " +
-				"SUBSTR("+InnerDBTable.Record.COLUMN_NAME_DATE+",5,2) || '-' || " +
-				"SUBSTR("+InnerDBTable.Record.COLUMN_NAME_DATE+",7,2) || ' ' || " +
-				"SUBSTR("+InnerDBTable.Record.COLUMN_NAME_DATE+",9,2) || ':' || " +
-				"SUBSTR("+InnerDBTable.Record.COLUMN_NAME_DATE+",11,2) AS " + InnerDBTable.Record.COLUMN_NAME_DATE 
+				SqlDBTable.Record.TABLE_NAME + "." + SqlDBTable.Record.COLUMN_NAME_ID,
+				SqlDBTable.Warehouse.COLUMN_NAME_NAME,
+				SqlDBTable.Record.COLUMN_NAME_AMOUNT,
+				SqlDBTable.Entry.COLUMN_NAME_UNIT,
+				SqlDBTable.Record.COLUMN_NAME_INOROUT,
+				SqlDBTable.Record.COLUMN_NAME_STATUS,
+				"SUBSTR("+SqlDBTable.Record.COLUMN_NAME_DATE+",1,4) || '-' || " +
+				"SUBSTR("+SqlDBTable.Record.COLUMN_NAME_DATE+",5,2) || '-' || " +
+				"SUBSTR("+SqlDBTable.Record.COLUMN_NAME_DATE+",7,2) || ' ' || " +
+				"SUBSTR("+SqlDBTable.Record.COLUMN_NAME_DATE+",9,2) || ':' || " +
+				"SUBSTR("+SqlDBTable.Record.COLUMN_NAME_DATE+",11,2) AS " + SqlDBTable.Record.COLUMN_NAME_DATE 
 		};
-		String selection = InnerDBTable.Record.COLUMN_NAME_ENTRY_NAME + " = ? AND " +
-				InnerDBTable.Record.COLUMN_NAME_ENTRY_TYPE + " = ? ";
-		String[] selectionArgs = {name, type};
+		String table = "(" + SqlDBTable.Record.TABLE_NAME + " LEFT JOIN " + SqlDBTable.Entry.TABLE_NAME + " ON " +
+				SqlDBTable.Record.TABLE_NAME + "." + SqlDBTable.Record.COLUMN_NAME_ENTRY_ID + "=" + 
+				SqlDBTable.Entry.TABLE_NAME + "." + SqlDBTable.Entry.COLUMN_NAME_ID+ ")" +
+				" LEFT JOIN " + SqlDBTable.Warehouse.TABLE_NAME + " ON " + 
+				SqlDBTable.Record.TABLE_NAME + "." + SqlDBTable.Record.COLUMN_NAME_WAREHOUSE_ID + "=" + 
+				SqlDBTable.Warehouse.TABLE_NAME + "." + SqlDBTable.Warehouse.COLUMN_NAME_ID;
+		String selection = SqlDBTable.Entry.COLUMN_NAME_NAME + " = ? AND " +
+				SqlDBTable.Entry.COLUMN_NAME_TYPE + " = " + type;
+		String[] selectionArgs = {name};
 		String groupBy = null;
 		String having = null;
 		String orderBy;
 		if (sortby.equals(""))
-			orderBy = InnerDBTable.Record.COLUMN_NAME_DATE + " DESC";
+			orderBy = SqlDBTable.Record.COLUMN_NAME_DATE + " DESC";
 		else
-			orderBy = sortby + " , " + InnerDBTable.Record.COLUMN_NAME_DATE + " DESC";
+			orderBy = sortby + " , " + SqlDBTable.Record.COLUMN_NAME_DATE + " DESC";
 		String limit = null;
 		
-		Cursor c = readableDB.query(InnerDBTable.Record.TABLE_NAME, projection, selection, selectionArgs, groupBy, having, orderBy, limit);
+		Cursor c = readableDB.query(table, projection, selection, selectionArgs, groupBy, having, orderBy, limit);
 		c.moveToFirst();
+		
+		ArrayList<HashMap<String, Object>> arrayList = new ArrayList<HashMap<String, Object>>();
+		c.moveToFirst();
+		
+		for (int i = 0; i<c.getCount(); i++){ 
+			HashMap<String, Object> map = new HashMap<String, Object>();
+			map.put(SqlDBTable.Record.COLUMN_NAME_ID, c.getInt(0));
+			map.put(SqlDBTable.Warehouse.COLUMN_NAME_NAME, c.getString(1));
+			map.put(SqlDBTable.Record.COLUMN_NAME_AMOUNT, c.getInt(2));
+			map.put(SqlDBTable.Entry.COLUMN_NAME_UNIT, c.getString(3));
+			if (c.getInt(4) == 0)
+				map.put(SqlDBTable.Record.COLUMN_NAME_INOROUT, R.drawable.icon_instock);
+			else
+				map.put(SqlDBTable.Record.COLUMN_NAME_INOROUT, R.drawable.icon_outstock);
+			if (c.getInt(5) == 0)
+				map.put(SqlDBTable.Record.COLUMN_NAME_STATUS, R.drawable.icon_pending);
+			else
+				map.put(SqlDBTable.Record.COLUMN_NAME_STATUS, R.drawable.icon_pass);
+			map.put(SqlDBTable.Record.COLUMN_NAME_DATE, c.getString(6));
+			
+			arrayList.add(map);
+			c.moveToNext();
+		}
 
 		readableDB.close();
-		return c;
+		return arrayList;
 	}
 	
-	//insert a new record into the Record table
-	public void recordInsert(String entryName, String entryType, String warehouse, int amount, String unit, String inOrOut, String status, String remark, Calendar calendar){
+	/* Insert a new record
+	 * INPUT: String entryName - the name of the entry
+	 *        int entryType - material or product
+	 *        int warehouseId - the warehouse of the entry 
+	 *        int amount - the amount of the entry
+	 *        String unit - the unit of the entry
+	 *        int inOrOut - instock or outstock
+	 *        String remark - the remark of the entry
+	 * OUTPUT: N/A
+	 */
+	public void recordInsert(String entryName, int entryType, int warehouseId, int amount, String unit, int inOrOut, String remark){
+		
+		SQLiteDatabase readableDB = dbHelper.getReadableDatabase();
+		
+		String[] projection = {
+				SqlDBTable.Entry.COLUMN_NAME_ID 
+		};
+		String table = SqlDBTable.Entry.TABLE_NAME;
+		String selection = SqlDBTable.Entry.COLUMN_NAME_NAME + " = ? AND " +
+				SqlDBTable.Entry.COLUMN_NAME_TYPE + " = ? ";
+		String[] selectionArgs = {entryName, ""+entryType};
+		String groupBy = null;
+		String having = null;
+		String orderBy = null;
+		String limit = null;
+		
+		Cursor c = readableDB.query(table, projection, selection, selectionArgs, groupBy, having, orderBy, limit);
+		c.moveToFirst();
+		
 		SQLiteDatabase writableDB = dbHelper.getWritableDatabase();
 		
-		ContentValues values = new ContentValues();
-		values.put(InnerDBTable.Record.COLUMN_NAME_ENTRY_NAME, entryName);
-		values.put(InnerDBTable.Record.COLUMN_NAME_ENTRY_TYPE, entryType);
-		values.put(InnerDBTable.Record.COLUMN_NAME_WAREHOUSE, warehouse);
-		values.put(InnerDBTable.Record.COLUMN_NAME_AMOUNT, amount);
-		values.put(InnerDBTable.Record.COLUMN_NAME_UNIT, unit);
-		values.put(InnerDBTable.Record.COLUMN_NAME_INOROUT, inOrOut);
-		values.put(InnerDBTable.Record.COLUMN_NAME_STATUS, status);
-		values.put(InnerDBTable.Record.COLUMN_NAME_REMARK, remark);
-		values.put(InnerDBTable.Record.COLUMN_NAME_DATE, parseDate(calendar));
+		String entryId;
+		if (c.getCount() <= 0){
+			ContentValues values = new ContentValues();
+			values.put(SqlDBTable.Entry.COLUMN_NAME_NAME, entryName);
+			values.put(SqlDBTable.Entry.COLUMN_NAME_TYPE, entryType);
+			values.put(SqlDBTable.Entry.COLUMN_NAME_UNIT, unit);
+			
+			writableDB.insert(SqlDBTable.Entry.TABLE_NAME, "null", values);
+			
+			c = readableDB.query(table, projection, selection, selectionArgs, groupBy, having, orderBy, limit);
+			c.moveToFirst();
+		}
+		entryId = c.getString(0);
 		
-		writableDB.insert(InnerDBTable.Record.TABLE_NAME, "null", values);
+		ContentValues values = new ContentValues();
+		values.put(SqlDBTable.Record.COLUMN_NAME_ENTRY_ID, entryId);
+		values.put(SqlDBTable.Record.COLUMN_NAME_WAREHOUSE_ID, warehouseId);
+		values.put(SqlDBTable.Record.COLUMN_NAME_AMOUNT, amount);
+		values.put(SqlDBTable.Record.COLUMN_NAME_INOROUT, inOrOut);
+		values.put(SqlDBTable.Record.COLUMN_NAME_STATUS, 0);
+		values.put(SqlDBTable.Record.COLUMN_NAME_REMARK, remark);
+		values.put(SqlDBTable.Record.COLUMN_NAME_DATE, parseDate(Calendar.getInstance()));
+		
+		writableDB.insert(SqlDBTable.Record.TABLE_NAME, "null", values);
 		writableDB.close();
 	}
 
-	//update the record status and date
-	public void recordUpdate(String id){
+	/* update the record status and date and update the current table as well
+	 * INPUT: int id - the record that need to update
+	 * OUTPUT: N/A
+	 */
+	public void recordUpdate(int id){
+		
+		//select record 
+		SQLiteDatabase readableDB = dbHelper.getReadableDatabase();
+		
+		String[] projection = {
+				SqlDBTable.Record.COLUMN_NAME_ENTRY_ID,
+				SqlDBTable.Record.COLUMN_NAME_WAREHOUSE_ID,
+				SqlDBTable.Record.COLUMN_NAME_AMOUNT,
+				SqlDBTable.Record.COLUMN_NAME_INOROUT,
+				SqlDBTable.Record.COLUMN_NAME_STATUS
+		};
+		String selection = 
+				SqlDBTable.Record.TABLE_NAME + "." + SqlDBTable.Record.COLUMN_NAME_ID + " = "+id;
+		String[] selectionArgs = {};
+		String groupBy = null;
+		String having = null;
+		String orderBy = null;
+		String limit = null;
+		
+		Cursor c = readableDB.query(SqlDBTable.Record.TABLE_NAME, projection, selection, selectionArgs, groupBy, having, orderBy, limit);
+		c.moveToFirst();
+		
+		String entryId = c.getString(0);
+		String warehouseId = c.getString(1);
+		int change = c.getInt(2);
+		int inorout = c.getInt(3);
 		
 		SQLiteDatabase writableDB = dbHelper.getWritableDatabase();
-		
-		String selection = InnerDBTable.Record.COLUMN_NAME_RECORD_ID + " = ?";
-		String[] selectionArgs = {""+id};
 		
 		Calendar calendar = Calendar.getInstance();
 		ContentValues values = new ContentValues();
-		values.put(InnerDBTable.Record.COLUMN_NAME_STATUS, "Í¨¹ý");
-		values.put(InnerDBTable.Record.COLUMN_NAME_DATE, parseDate(calendar));
+		values.put(SqlDBTable.Record.COLUMN_NAME_STATUS, "1");
+		values.put(SqlDBTable.Record.COLUMN_NAME_DATE, parseDate(calendar));
 		
-		writableDB.update(InnerDBTable.Record.TABLE_NAME, values, selection, selectionArgs);
+		writableDB.update(SqlDBTable.Record.TABLE_NAME, values, selection, selectionArgs);
 		
+		//select current
+		projection = new String[] {
+				SqlDBTable.Current.COLUMN_NAME_ID,
+				SqlDBTable.Current.COLUMN_NAME_AMOUNT};
+		selection = 
+				SqlDBTable.Current.COLUMN_NAME_ENTRY_ID + " = ? AND " +
+				SqlDBTable.Current.COLUMN_NAME_WAREHOUSE_ID + " = ?";
+		selectionArgs = new String[] {entryId, warehouseId};
+		groupBy = null;
+		having = null;
+		orderBy = null;
+		limit = null;
 		
+		c = readableDB.query(SqlDBTable.Current.TABLE_NAME, projection, selection, selectionArgs, groupBy, having, orderBy, limit);
+		if (c.getCount() > 0) {
+			c.moveToFirst();
+			int amount = c.getInt(1);
+			
+			values = new ContentValues();
+			if (inorout == 0) {
+				values.put(SqlDBTable.Current.COLUMN_NAME_AMOUNT, amount+change);
+			}
+			else {
+				values.put(SqlDBTable.Current.COLUMN_NAME_AMOUNT, amount-change);
+			}
+			
+			writableDB.update(SqlDBTable.Current.TABLE_NAME, values, selection, selectionArgs);
+		}
+		else {
+			values = new ContentValues();
+			values.put(SqlDBTable.Current.COLUMN_NAME_ENTRY_ID, entryId);
+			values.put(SqlDBTable.Current.COLUMN_NAME_WAREHOUSE_ID, warehouseId);
+			values.put(SqlDBTable.Current.COLUMN_NAME_AMOUNT, change);
+			
+			writableDB.insert(SqlDBTable.Current.TABLE_NAME, "null", values);
+		}
+		readableDB.close();
 		writableDB.close();
 	}
 	
+	/* delete specific record with the id
+	 * INPUT: int id - the id of the record
+	 * OUTPUT: N/A
+	 */
 	//delete a record
-	public void recordDelete(String id){
+	public void recordDelete(int id){
 		
 		SQLiteDatabase writableDB = dbHelper.getWritableDatabase();
 		
-		String selection = InnerDBTable.Record.COLUMN_NAME_RECORD_ID + " = ?";
-		String[] selectionArgs = {""+id};
+		String selection = SqlDBTable.Record.COLUMN_NAME_ID + " = " + id;
+		String[] selectionArgs = {};
 		
-		writableDB.delete(InnerDBTable.Record.TABLE_NAME, selection, selectionArgs);
+		writableDB.delete(SqlDBTable.Record.TABLE_NAME, selection, selectionArgs);
 		
 		writableDB.close();
 	}
 	
-	public int entrySelectUsableAmount(String name, String type, String warehouse){
+	/* return the current usable amount of the entry
+	 * INPUT: int id - the id of the specific entry
+	 *        int warehouseId - the id of the specific warehouse
+	 * OUTPUT: int usableAmount - the usable amount of the entry in the warehouse
+	 */
+	public int entrySelectUsableAmount(int id, int warehouseId){
 
 		SQLiteDatabase readableDB = dbHelper.getReadableDatabase();
 		
 		String[] projection = {
-				InnerDBTable.Current.COLUMN_NAME_AMOUNT, 
+				SqlDBTable.Current.COLUMN_NAME_AMOUNT, 
 		};
 		String selection = 
-				InnerDBTable.Current.COLUMN_NAME_ENTRY_NAME + " = ? AND " +
-				InnerDBTable.Current.COLUMN_NAME_ENTRY_TYPE + " = ? AND " +
-				InnerDBTable.Current.COLUMN_NAME_WAREHOUSE + " = ?";
-		String[] selectionArgs = {name, type, warehouse};
-		String groupBy = InnerDBTable.Current.COLUMN_NAME_ENTRY_NAME + " , " + InnerDBTable.Current.COLUMN_NAME_ENTRY_TYPE;
+				SqlDBTable.Current.COLUMN_NAME_ENTRY_ID + " = " + id + " AND " +
+				SqlDBTable.Current.COLUMN_NAME_WAREHOUSE_ID + " = " + warehouseId;
+		String[] selectionArgs = {};
+		String groupBy = null;
 		String having = null;
 		String orderBy = null;
 		String limit = null;
 
-		Cursor c = readableDB.query(InnerDBTable.Current.TABLE_NAME, projection, selection, selectionArgs, groupBy, having, orderBy, limit);
+		Cursor c = readableDB.query(SqlDBTable.Current.TABLE_NAME, projection, selection, selectionArgs, groupBy, having, orderBy, limit);
 		c.moveToFirst();
 
 		int total;
@@ -410,25 +575,22 @@ public class InnerDBExec{
 			total = Integer.parseInt(c.getString(0));
 		
 		projection = new String[] {
-				"SUM(" + InnerDBTable.Record.COLUMN_NAME_AMOUNT + ") AS " + InnerDBTable.Record.COLUMN_NAME_AMOUNT 
+				"SUM(" + SqlDBTable.Record.COLUMN_NAME_AMOUNT + ") AS " + SqlDBTable.Record.COLUMN_NAME_AMOUNT 
 		};
 		selection = 
-				InnerDBTable.Record.COLUMN_NAME_ENTRY_NAME + " = ? AND " +
-				InnerDBTable.Record.COLUMN_NAME_ENTRY_TYPE + " = ? AND " +
-				InnerDBTable.Record.COLUMN_NAME_WAREHOUSE + " = ? AND " +
-				InnerDBTable.Record.COLUMN_NAME_STATUS + " = ? AND " + 
-				InnerDBTable.Record.COLUMN_NAME_INOROUT + " = ?";
-		selectionArgs = new String[] {name, type, warehouse, "´ýÉó", "³ö¿â"};
+				SqlDBTable.Record.COLUMN_NAME_ENTRY_ID + " = " + id + " AND " +
+				SqlDBTable.Record.COLUMN_NAME_WAREHOUSE_ID + " = " + warehouseId + " AND " +
+				SqlDBTable.Record.COLUMN_NAME_STATUS + " = 0 AND " + 
+				SqlDBTable.Record.COLUMN_NAME_INOROUT + " = 1";
+		selectionArgs = new String[] {};
 		groupBy = 
-				InnerDBTable.Record.COLUMN_NAME_ENTRY_NAME + ", " +
-				InnerDBTable.Record.COLUMN_NAME_ENTRY_TYPE + ", " +
-				InnerDBTable.Record.COLUMN_NAME_WAREHOUSE + ", " +
-				InnerDBTable.Record.COLUMN_NAME_STATUS;
+				SqlDBTable.Record.COLUMN_NAME_ENTRY_ID + ", " +
+				SqlDBTable.Record.COLUMN_NAME_WAREHOUSE_ID;
 		having = null;
 		orderBy = null;
 		limit = null;
 		
-		c = readableDB.query(InnerDBTable.Record.TABLE_NAME, projection, selection, selectionArgs, groupBy, having, orderBy, limit);
+		c = readableDB.query(SqlDBTable.Record.TABLE_NAME, projection, selection, selectionArgs, groupBy, having, orderBy, limit);
 		c.moveToFirst();
 		
 		int used;
@@ -443,11 +605,17 @@ public class InnerDBExec{
 		
 	}
 	
-	public String[] warehouseSelectAll(){
+	/* select all the warehouse
+	 * INPUT: N/A
+	 * OUTPUT: warehouse._id, warehouse.Warehouse_Name
+	 *         IN ArrayList<HashMap<String, Object>>
+	 */
+	public ArrayList<HashMap<String, Object>> warehouseSelectAll(){
 		SQLiteDatabase readableDB = dbHelper.getReadableDatabase();
 		
 		String[] projection = {
-				InnerDBTable.Warehouse.COLUMN_NAME_WAREHOUSE_NAME
+				SqlDBTable.Warehouse.COLUMN_NAME_ID,
+				SqlDBTable.Warehouse.COLUMN_NAME_NAME
 		};
 		String selection = "";
 		String[] selectionArgs = null;
@@ -456,17 +624,23 @@ public class InnerDBExec{
 		String orderBy = "";
 		String limit = null;
 		
-		Cursor c = readableDB.query(InnerDBTable.Warehouse.TABLE_NAME, projection, selection, selectionArgs, groupBy, having, orderBy, limit);
+		Cursor c = readableDB.query(SqlDBTable.Warehouse.TABLE_NAME, projection, selection, selectionArgs, groupBy, having, orderBy, limit);
+		
+		ArrayList<HashMap<String, Object>> arrayList = new ArrayList<HashMap<String, Object>>();
 		c.moveToFirst();
-
-		String[] result = new String[c.getCount()];
-		for (int i = 0; i<c.getCount(); i++){
-			result[i] = c.getString(0);
+		
+		for (int i = 0; i<c.getCount(); i++){ 
+			
+			HashMap<String, Object> map = new HashMap<String, Object>();
+			map.put(SqlDBTable.Warehouse.COLUMN_NAME_ID, c.getInt(0));
+			map.put(SqlDBTable.Warehouse.COLUMN_NAME_NAME, c.getString(1));
+			
+			arrayList.add(map);
 			c.moveToNext();
 		}
 		
 		readableDB.close();
-		return result;
+		return arrayList;
 	}
 	
 	private String parseDate(Calendar calendar){

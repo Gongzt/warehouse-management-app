@@ -21,39 +21,220 @@ public final class R {
         public static final int activity_vertical_margin=0x7f040001;
     }
     public static final class drawable {
-        public static final int ic_launcher=0x7f020000;
+        public static final int actionbar_button=0x7f020000;
+        public static final int actionbar_icon=0x7f020001;
+        public static final int actionbutton_background=0x7f020002;
+        public static final int actionbutton_pressed=0x7f020003;
+        public static final int column_asec=0x7f020004;
+        public static final int column_blue=0x7f020005;
+        public static final int column_button_blue=0x7f020006;
+        public static final int column_button_green=0x7f020007;
+        public static final int column_button_green_selected=0x7f020008;
+        public static final int column_button_orange=0x7f020009;
+        public static final int column_button_orange_selected=0x7f02000a;
+        public static final int column_desc=0x7f02000b;
+        public static final int column_green=0x7f02000c;
+        public static final int column_lightblue=0x7f02000d;
+        public static final int column_lightgreen=0x7f02000e;
+        public static final int column_lightorange=0x7f02000f;
+        public static final int column_orange=0x7f020010;
+        public static final int date=0x7f020011;
+        public static final int date1=0x7f020012;
+        public static final int date2=0x7f020013;
+        public static final int date_button=0x7f020014;
+        public static final int date_pressed=0x7f020015;
+        public static final int divider=0x7f020016;
+        public static final int entry_navigation=0x7f020017;
+        public static final int ic_launcher=0x7f020018;
+        public static final int icon_accept=0x7f020019;
+        public static final int icon_cancel=0x7f02001a;
+        public static final int icon_clean=0x7f02001b;
+        public static final int icon_confirm=0x7f02001c;
+        public static final int icon_instock=0x7f02001d;
+        public static final int icon_instock_save=0x7f02001e;
+        public static final int icon_material=0x7f02001f;
+        public static final int icon_navigation=0x7f020020;
+        public static final int icon_outstock=0x7f020021;
+        public static final int icon_outstock_save=0x7f020022;
+        public static final int icon_pass=0x7f020023;
+        public static final int icon_pending=0x7f020024;
+        public static final int icon_product=0x7f020025;
+        public static final int tab=0x7f020026;
+        public static final int tab_background=0x7f020027;
+        public static final int tab_current=0x7f020028;
+        public static final int tab_instock=0x7f020029;
+        public static final int tab_pressed=0x7f02002a;
+        public static final int tab_record=0x7f02002b;
+        public static final int tab_selected=0x7f02002c;
+        public static final int tab_setting=0x7f02002d;
+        public static final int wait_dialog=0x7f02002e;
     }
     public static final class id {
-        public static final int action_settings=0x7f080000;
+        public static final int SettingTextView=0x7f08002e;
+        public static final int action_settings=0x7f080052;
+        public static final int actionbarCleanButton=0x7f080017;
+        public static final int actionbarDivider=0x7f080016;
+        public static final int actionbarSaveButton=0x7f080015;
+        public static final int actionbarTitle=0x7f080014;
+        public static final int currentAmountButton=0x7f080003;
+        public static final int currentAmountTextView=0x7f080006;
+        public static final int currentEntryButton=0x7f080002;
+        public static final int currentEntryTextView=0x7f080005;
+        public static final int currentSearchBar=0x7f080000;
+        public static final int currentTypeButton=0x7f080001;
+        public static final int currentTypeImage=0x7f080004;
+        public static final int currentUnitTextView=0x7f080007;
+        public static final int inoroutAmountEdittext=0x7f08000f;
+        public static final int inoroutConfirmButton=0x7f080009;
+        public static final int inoroutEntryTextView=0x7f08000a;
+        public static final int inoroutRemarkEdittext=0x7f080013;
+        public static final int inoroutTitleTextView=0x7f080008;
+        public static final int inoroutTypeImage=0x7f08000c;
+        public static final int inoroutTypeTextView=0x7f08000b;
+        public static final int inoroutUnitTextview=0x7f080010;
+        public static final int inoroutUsableAmountLayout=0x7f08000d;
+        public static final int inoroutUsableAmountTextView=0x7f08000e;
+        public static final int inoroutWarehouseSpinner=0x7f080012;
+        public static final int inoroutWarehouseTextview=0x7f080011;
+        public static final int instockAmountEdittext=0x7f08001a;
+        public static final int instockEntryAutocom=0x7f080018;
+        public static final int instockRemarkEdittext=0x7f08001d;
+        public static final int instockTypeSpinner=0x7f080019;
+        public static final int instockUnitEdittext=0x7f08001b;
+        public static final int instockWarehouseSpinner=0x7f08001c;
+        public static final int recordAmountTextView=0x7f080029;
+        public static final int recordDateButton=0x7f080022;
+        public static final int recordDateEndButton=0x7f080021;
+        public static final int recordDateStartButton=0x7f08001f;
+        public static final int recordDateTextView=0x7f080027;
+        public static final int recordDatetoTextview=0x7f080020;
+        public static final int recordEntryButton=0x7f080026;
+        public static final int recordEntryTextView=0x7f08002d;
+        public static final int recordInoroutButton=0x7f080023;
+        public static final int recordInoroutImage=0x7f080028;
+        public static final int recordSearchBar=0x7f08001e;
+        public static final int recordStatusButton=0x7f080025;
+        public static final int recordStatusImage=0x7f08002c;
+        public static final int recordTypeButton=0x7f080024;
+        public static final int recordTypeImage=0x7f08002b;
+        public static final int recordUnitTextView=0x7f08002a;
+        public static final int simpleListText=0x7f08002f;
+        public static final int singleCurrentAmountButton=0x7f080037;
+        public static final int singleCurrentAmountExpandable=0x7f080033;
+        public static final int singleCurrentDateButton=0x7f080034;
+        public static final int singleCurrentExpandableAmountTextView=0x7f08003c;
+        public static final int singleCurrentExpandableImage=0x7f080039;
+        public static final int singleCurrentExpandableTextView=0x7f08003a;
+        public static final int singleCurrentExpandableWarehouseTextView=0x7f08003b;
+        public static final int singleCurrentInoroutButton=0x7f080036;
+        public static final int singleCurrentInstockButton=0x7f080031;
+        public static final int singleCurrentListingAmountTextView=0x7f080040;
+        public static final int singleCurrentListingDateTextView=0x7f08003d;
+        public static final int singleCurrentListingInoroutImage=0x7f08003f;
+        public static final int singleCurrentListingStatusImage=0x7f080042;
+        public static final int singleCurrentListingUnitTextView=0x7f080041;
+        public static final int singleCurrentListingWarehouseTextView=0x7f08003e;
+        public static final int singleCurrentOutstockButton=0x7f080032;
+        public static final int singleCurrentStatusButton=0x7f080038;
+        public static final int singleCurrentTitleTextView=0x7f080030;
+        public static final int singleCurrentWarehouseButton=0x7f080035;
+        public static final int singleRecordAmountTextView=0x7f08004c;
+        public static final int singleRecordDateTextView=0x7f080049;
+        public static final int singleRecordDeleteButton=0x7f080045;
+        public static final int singleRecordEntryTextView=0x7f080047;
+        public static final int singleRecordInoroutImage=0x7f08004a;
+        public static final int singleRecordPassButton=0x7f080044;
+        public static final int singleRecordRemarkTextView=0x7f08004d;
+        public static final int singleRecordStatusImage=0x7f080048;
+        public static final int singleRecordTitle=0x7f080043;
+        public static final int singleRecordTypeImage=0x7f080046;
+        public static final int singleRecordWarehouseTextView=0x7f08004b;
+        public static final int waitDialogProfressBar=0x7f08004e;
+        public static final int waitDialogSeekBar=0x7f080051;
+        public static final int waitingDialogProgressText=0x7f080050;
+        public static final int waitingDialogTypeText=0x7f08004f;
     }
     public static final class layout {
-        public static final int activity_main=0x7f030000;
-        public static final int customized_title=0x7f030001;
-        public static final int fragment1_list=0x7f030002;
-        public static final int fragment2_settings=0x7f030003;
+        public static final int current_fragment=0x7f030000;
+        public static final int current_list_item=0x7f030001;
+        public static final int inorout_actionbar=0x7f030002;
+        public static final int inorout_activity=0x7f030003;
+        public static final int instock_actionbar=0x7f030004;
+        public static final int instock_fragment=0x7f030005;
+        public static final int record_fragment=0x7f030006;
+        public static final int record_list_item=0x7f030007;
+        public static final int setting_fragment=0x7f030008;
+        public static final int simple_list_item=0x7f030009;
+        public static final int single_current_actionbar=0x7f03000a;
+        public static final int single_current_activity=0x7f03000b;
+        public static final int single_current_expandable=0x7f03000c;
+        public static final int single_current_expandable_listing=0x7f03000d;
+        public static final int single_current_record_listing=0x7f03000e;
+        public static final int single_record_actionbar=0x7f03000f;
+        public static final int single_record_activity=0x7f030010;
+        public static final int waiting_dialog=0x7f030011;
+        public static final int warehouse_management_main=0x7f030012;
     }
     public static final class menu {
-        public static final int main=0x7f070000;
+        public static final int inorout=0x7f070000;
+        public static final int main=0x7f070001;
+        public static final int single_current=0x7f070002;
+        public static final int single_record=0x7f070003;
     }
     public static final class string {
         public static final int action_settings=0x7f050001;
+        public static final int actionbar_clear=0x7f050018;
+        public static final int actionbar_instock=0x7f050017;
         public static final int app_name=0x7f050000;
+        public static final int common_wait_message=0x7f050024;
+        public static final int date_end=0x7f05000c;
+        public static final int date_start=0x7f05000b;
+        public static final int date_to=0x7f05000a;
+        public static final int inorout_usable_amount=0x7f050019;
+        public static final int instock=0x7f05001e;
+        public static final int instock_amount=0x7f050011;
+        public static final int instock_entry=0x7f05000d;
+        public static final int instock_entry_autocom=0x7f05000e;
+        public static final int instock_inorout=0x7f050015;
+        public static final int instock_record=0x7f050014;
+        public static final int instock_remark=0x7f050016;
+        public static final int instock_remark_hint=0x7f05000f;
+        public static final int instock_type=0x7f050010;
+        public static final int instock_unit=0x7f050012;
+        public static final int instock_warehouse=0x7f050013;
+        public static final int material=0x7f05001b;
+        public static final int outstock=0x7f05001f;
+        public static final int passed=0x7f05001d;
+        public static final int pending=0x7f05001c;
+        public static final int product=0x7f05001a;
+        public static final int search_text=0x7f050002;
+        public static final int sort_amount=0x7f050006;
+        public static final int sort_date=0x7f050003;
+        public static final int sort_entry=0x7f050005;
+        public static final int sort_inorout=0x7f050007;
+        public static final int sort_status=0x7f050008;
+        public static final int sort_type=0x7f050004;
+        public static final int sort_warehouse=0x7f050009;
+        public static final int text_default=0x7f050023;
+        public static final int title_activity_inorout=0x7f050022;
+        public static final int title_activity_single_current=0x7f050020;
+        public static final int title_activity_single_record=0x7f050021;
     }
     public static final class style {
-        public static final int AppThemeBlack=0x7f060001;
         /** 
         Base application theme, dependent on API level. This theme is replaced
         by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
     
-
-            Theme customizations available in newer API levels can go in
-            res/values-vXX/styles.xml, while customizations related to
-            backward-compatibility can go here.
-        
          */
-        public static final int AppThemeLight=0x7f060000;
-        /**  Application theme. 
-         */
-        public static final int Customized=0x7f060002;
+        public static final int AppTheme=0x7f060000;
+        public static final int ColumnButton=0x7f060004;
+        public static final int ColumnButtonCurent=0x7f060005;
+        public static final int ColumnButtonRecord=0x7f060006;
+        public static final int ColumnEntryCurrent=0x7f060007;
+        public static final int ColumnEntryRecord=0x7f060008;
+        public static final int DateButton=0x7f060003;
+        public static final int FormTextfield=0x7f060009;
+        public static final int Tab=0x7f060002;
+        public static final int Widget_ActionBar=0x7f060001;
     }
 }
